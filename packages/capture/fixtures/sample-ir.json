@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "sourceUrl": "file://fixtures/sample-page.html",
+  "capturedAt": "2026-07-31T12:00:00.000Z",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "title": "CtrlC Sample Capture Page",
+  "sections": [
+    {
+      "id": "site-header",
+      "label": "Site header",
+      "interactionModel": "click",
+      "selector": "header[data-section=\"header\"]",
+      "boundingBox": { "x": 0, "y": 0, "width": 1440, "height": 64 },
+      "textSample": "CtrlC Sample Features Get started",
+      "styles": {
+        "display": "flex",
+        "position": "static",
+        "backgroundColor": "rgb(30, 41, 59)",
+        "color": "rgb(248, 250, 252)",
+        "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
+        "fontSize": "16px"
+      },
+      "childrenHints": ["div", "nav"]
+    },
+    {
+      "id": "hero",
+      "label": "Hero",
+      "interactionModel": "click",
+      "selector": "section[data-section=\"hero\"]",
+      "boundingBox": { "x": 0, "y": 64, "width": 1440, "height": 420 },
+      "textSample": "Rebuild pages as React sections Sample multi-section landing page",
+      "styles": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
+        "fontSize": "16px"
+      },
+      "childrenHints": ["img", "h1", "p", "a"]
+    },
+    {
+      "id": "features",
+      "label": "Features",
+      "interactionModel": "static",
+      "selector": "section[data-section=\"features\"]",
+      "boundingBox": { "x": 0, "y": 484, "width": 1440, "height": 320 },
+      "textSample": "Features Page IR SectionPack Specs first",
+      "styles": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgb(30, 41, 59)",
+        "color": "rgb(248, 250, 252)",
+        "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
+        "fontSize": "16px"
+      },
+      "childrenHints": ["h2", "div"]
+    },
+    {
+      "id": "call-to-action",
+      "label": "Call to action",
+      "interactionModel": "click",
+      "selector": "section[data-section=\"cta\"]",
+      "boundingBox": { "x": 0, "y": 804, "width": 1440, "height": 220 },
+      "textSample": "Ready to capture Use this fixture HTML with ctrlc capture tests",
+      "styles": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(248, 250, 252)",
+        "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
+        "fontSize": "16px"
+      },
+      "childrenHints": ["h2", "p", "button"]
+    },
+    {
+      "id": "site-footer",
+      "label": "Site footer",
+      "interactionModel": "static",
+      "selector": "footer[data-section=\"footer\"]",
+      "boundingBox": { "x": 0, "y": 1024, "width": 1440, "height": 56 },
+      "textSample": "Fixture only. Not a production site.",
+      "styles": {
+        "display": "block",
+        "position": "static",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(148, 163, 184)",
+        "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
+        "fontSize": "14px"
+      }
+    }
+  ],
+  "tokens": {
+    "colors": [
+      "rgb(15, 23, 42)",
+      "rgb(30, 41, 59)",
+      "rgb(248, 250, 252)",
+      "rgb(148, 163, 184)",
+      "rgb(56, 189, 248)"
+    ],
+    "fonts": [
+      "Segoe UI",
+      "system-ui",
+      "Georgia"
+    ],
+    "cssVariables": {
+      "--color-bg": "#0f172a",
+      "--color-surface": "#1e293b",
+      "--color-text": "#f8fafc",
+      "--color-muted": "#94a3b8",
+      "--color-accent": "#38bdf8",
+      "--font-sans": "\"Segoe UI\", system-ui, -apple-system, sans-serif"
+    }
+  },
+  "assets": [
+    {
+      "url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%2338bdf8'/%3E%3C/svg%3E",
+      "kind": "image"
+    }
+  ],
+  "notes": [
+    "Golden IR for packages/capture/fixtures/sample-page.html (B7).",
+    "No Playwright required; unit tests validate schema + section ids.",
+    "Screenshot baseline (F2): screenshot.png under capture outDir when live capture runs."
+  ]
+}

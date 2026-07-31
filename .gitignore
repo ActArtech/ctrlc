@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.local
+.cache/
+tmp/
+temp/
+*.zip
+
+# Generated SectionPack library (regenerate: npm run library)
+**/.ctrlc/library/
+
+# Page capture runs (ctrlc capture --out runs/...)
+runs/
+
+# Snapshots / local agent library dumps (regenerate)
+**/.ctrlc/snapshots/
+**/.ctrlc/*.json.bak
+
+# Optional local worktrees / OS junk
+*.swp
+*~

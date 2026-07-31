@@ -1,0 +1,33 @@
+/* Clone host base styles. Replace tokens from docs/research/DESIGN_TOKENS.md. */
+
+:root {
+  color-scheme: light;
+  --pc-bg: #f8fafc;
+  --pc-ink: #0f172a;
+  --pc-muted: #64748b;
+  --pc-font: "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --pc-max: 1120px;
+  --pc-gutter: clamp(1rem, 3vw, 1.75rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--pc-font);
+  color: var(--pc-ink);
+  background: var(--pc-bg);
+}
+
+main {
+  min-height: 40vh;
+}

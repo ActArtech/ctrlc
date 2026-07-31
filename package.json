@@ -1,0 +1,50 @@
+{
+  "name": "ctrlc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CtrlC: clone a page (or site) into React components. SectionPack: natural language + code-as-is export per section. Never HTML dumps.",
+  "license": "MIT",
+  "keywords": [
+    "ctrlc",
+    "sectionpack",
+    "react",
+    "nextjs",
+    "clone",
+    "design-system",
+    "agent",
+    "mcp"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @ctrlc/core && npm run build -w @ctrlc/react && npm run build -w @ctrlc/next && npm run build -w @ctrlc/capture",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @ctrlc/core && npm run test -w @ctrlc/cli && npm run test -w @ctrlc/capture",
+    "test:mcp": "npm run test -w @ctrlc/mcp",
+    "test:cli": "npm run test -w @ctrlc/cli",
+    "validate": "npm run validate -w @ctrlc/core",
+    "validate:demo": "node scripts/validate-packs.mjs",
+    "ctrlc": "node packages/cli/bin/ctrlc.mjs",
+    "watch": "node packages/cli/bin/ctrlc.mjs watch --cwd examples/next-demo",
+    "snapshot": "node packages/cli/bin/ctrlc.mjs snapshot --cwd examples/next-demo",
+    "library": "node packages/cli/bin/ctrlc.mjs library --cwd examples/next-demo",
+    "check:drift": "node scripts/check-pack-drift.mjs --cwd examples/next-demo",
+    "create": "node scripts/create-ctrlc-app.mjs",
+    "init-clone": "node packages/cli/bin/ctrlc.mjs init-clone",
+    "dev:demo": "npm run dev -w @ctrlc/next-demo",
+    "build:demo": "npm run build -w @ctrlc/next-demo",
+    "docker:demo": "docker compose up --build demo"
+  },
+  "bin": {
+    "ctrlc": "./packages/cli/bin/ctrlc.mjs"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,73 @@
+# Agent notes - CtrlC clone
+
+**Source URL:** (set with ctrlc init-clone --url or edit this file)  
+**Scope:** page (page default; site only if requested)  
+**Stack:** Next.js App Router + React sections + **SectionPack**
+
+## Non-negotiable
+
+1. **React components only** - never ship HTML dumps / wget mirrors as the product.  
+2. **Page-first** - clone the target URL page unless scope=site.  
+3. **Dual export always** - after each section builds, register it for:
+   - **Natural language** (`describe`)
+   - **Code as-is** (`prompt` / zip)  
+4. **Spec before build** - write `docs/research/components/<id>.spec.md` first.  
+5. **Build must compile** - `npm run build` / `ctrlc qa` before done.
+
+## SectionPack auto-register (required)
+
+After each section component is implemented:
+
+```bash
+ctrlc register <id> --cwd . \
+  --component src/components/sections/<Name>.tsx \
+  --export <Name> \
+  --content-module src/content/home.ts \
+  --content-key <camelKey> \
+  --css src/styles/app.css \
+  --selector .<css-class> \
+  --interaction scroll|click|hover|static|time|hybrid \
+  --from-spec docs/research/components/<id>.spec.md
+```
+
+Then wrap in page:
+
+```tsx
+<SectionBoundary id="<id>" label="..." component="<Name>">
+  <Name />
+</SectionBoundary>
+```
+
+Registry lives at `.ctrlc/registry.json` and is **merged automatically** when loading config.
+
+## Skill
+
+Follow `.claude/skills/ctrlc-clone/SKILL.md` (or monorepo skill of the same name).
+
+Builder prompt (one section): monorepo `docs/templates/section-builder.prompt.md`  
+Parallel dispatch: monorepo `docs/templates/parallel-build.md`
+
+## Research layout
+
+```text
+docs/research/PAGE_TOPOLOGY.md
+docs/research/DESIGN_TOKENS.md
+docs/research/BEHAVIORS.md
+docs/research/components/*.spec.md
+docs/design-references/   # screenshots
+```
+
+## QA before declaring complete
+
+```bash
+ctrlc validate --cwd .
+ctrlc list --cwd .
+ctrlc qa --cwd .
+ctrlc pack <id> --format describe --cwd .
+ctrlc pack <id> --format prompt-short --cwd .
+```
+
+## Differentiator
+
+CtrlC = clone pipeline + **SectionPack** (NL brief + multi-file code pack).  
+Not an HTML mirror tool.

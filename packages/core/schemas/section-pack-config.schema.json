@@ -1,0 +1,250 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ctrlc.dev/schemas/section-pack-config.schema.json",
+  "title": "SectionPackConfig",
+  "description": "Host configuration for SectionPack assembly: sections, recipes, default variables, and shared CSS util selectors.",
+  "type": "object",
+  "required": ["sections"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Config format version. Missing is treated as 1. Only 1 is currently supported."
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered list of section pack entries.",
+      "items": {
+        "$ref": "#/definitions/SectionPackEntry"
+      }
+    },
+    "recipes": {
+      "type": "array",
+      "description": "Named multi-section recipes (ordered section id lists).",
+      "items": {
+        "$ref": "#/definitions/PackRecipe"
+      }
+    },
+    "defaultVariables": {
+      "type": "object",
+      "description": "Default {{key}} replacement values for pack prompts.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "sharedUtilSelectors": {
+      "type": "array",
+      "description": "Shared utility CSS class selectors auto-included when referenced.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "behaviorSpecs": {
+      "type": "object",
+      "description": "Extra behavior briefs keyed by section id (functions omitted from JSON configs).",
+      "additionalProperties": {
+        "$ref": "#/definitions/BehaviorBriefSpec"
+      }
+    }
+  },
+  "definitions": {
+    "BehaviorBriefSpec": {
+      "type": "object",
+      "required": [
+        "id",
+        "whatItIs",
+        "function",
+        "behavior",
+        "motion",
+        "layout",
+        "color",
+        "type",
+        "responsive",
+        "a11y",
+        "influences",
+        "rebuildGuidance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Should match the section id."
+        },
+        "whatItIs": {
+          "type": "string",
+          "description": "One-line identity."
+        },
+        "function": {
+          "type": "string",
+          "description": "Business / UX job."
+        },
+        "behavior": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "User-visible behaviors and states."
+        },
+        "motion": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Motion / animation language."
+        },
+        "layout": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Layout, alignment, spacing language."
+        },
+        "color": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Color and surface language."
+        },
+        "type": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Typography notes."
+        },
+        "responsive": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Responsive / breakpoint notes."
+        },
+        "a11y": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Accessibility expectations."
+        },
+        "influences": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "What other systems this depends on or influences."
+        },
+        "rebuildGuidance": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Suggested rebuild constraints for an agent."
+        }
+      }
+    },
+    "SectionPackEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "description",
+        "componentPath",
+        "componentExport",
+        "contentKeys",
+        "cssSelectors",
+        "cssModulePath",
+        "tags",
+        "promptRole"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable section identifier."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable section name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Short section description for catalogs and prompts."
+        },
+        "componentPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Component file path relative to project root (cwd)."
+        },
+        "componentExport": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Named export (or default) for the section component."
+        },
+        "contentKeys": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Content keys exported from the content module (if any)."
+        },
+        "contentModulePath": {
+          "type": "string",
+          "description": "Optional content module path relative to project root."
+        },
+        "cssSelectors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Class prefixes/selectors used to extract CSS."
+        },
+        "cssModulePath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "CSS file path relative to project root."
+        },
+        "relatedPaths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional shared dependency paths to include in full packs."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Catalog tags for filtering and recipes."
+        },
+        "promptRole": {
+          "type": "string",
+          "description": "Suggested prompt use / role for this section."
+        },
+        "behavior": {
+          "$ref": "#/definitions/BehaviorBriefSpec",
+          "description": "Optional embedded behavior brief (overrides registry by id)."
+        },
+        "previewImage": {
+          "type": "string",
+          "description": "Optional catalog preview image (public-relative path, site path, or absolute URL). Prefer public/ctrlc-previews/<id>.png."
+        },
+        "thumbnail": {
+          "type": "string",
+          "description": "Alias of previewImage for hosts that prefer thumbnail naming."
+        }
+      }
+    },
+    "PackRecipe": {
+      "type": "object",
+      "required": ["id", "label", "description", "sectionIds"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable recipe identifier."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable recipe name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Recipe description for catalogs."
+        },
+        "sectionIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Ordered section ids included in this recipe."
+        }
+      }
+    }
+  }
+}

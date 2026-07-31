@@ -1,0 +1,23 @@
+# CtrlC Northline demo (SectionPack host on :3040)
+#
+# From monorepo root (Docker Desktop / Linux / WSL):
+#   docker compose up --build demo
+#   npm run docker:demo
+#
+# Open http://localhost:3040
+# Catalog: http://localhost:3040/dev/packs
+#
+# Note: containers are Linux even when the host is Windows.
+
+services:
+  demo:
+    build:
+      context: .
+      dockerfile: examples/next-demo/Dockerfile
+    ports:
+      - "3040:3040"
+    environment:
+      NODE_ENV: production
+      PORT: "3040"
+      # Allow SectionPack HTTP API outside NODE_ENV=development
+      SECTION_PACK_ENABLED: "true"

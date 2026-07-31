@@ -1,0 +1,36 @@
+{
+  "name": "@ctrlc/cli",
+  "version": "0.1.0",
+  "description": "SectionPack CLI: validate, list, pack, pack-multi, graph, scan, snapshot, watch, library, and capture for CtrlC hosts.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "ctrlc": "./bin/ctrlc.mjs"
+  },
+  "exports": {
+    ".": "./src/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "scripts"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "ctrlc": "node ./bin/ctrlc.mjs",
+    "test": "node ./scripts/test-cli.mjs",
+    "prepublishOnly": "node --input-type=module -e \"import fs from 'node:fs'; if (!fs.existsSync('bin/ctrlc.mjs')) { console.error('missing bin/ctrlc.mjs'); process.exit(1); }\""
+  },
+  "dependencies": {
+    "@ctrlc/capture": "0.1.0",
+    "@ctrlc/core": "0.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

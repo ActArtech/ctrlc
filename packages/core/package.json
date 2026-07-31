@@ -1,0 +1,53 @@
+{
+  "name": "@ctrlc/core",
+  "version": "0.1.0",
+  "description": "SectionPack builder: natural-language briefs and multi-file code packs for page sections.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./schema.json": "./schemas/section-pack-config.schema.json"
+  },
+  "files": [
+    "dist",
+    "src",
+    "schemas"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "clean:stubs": "node scripts/_cleanup-stubs.mjs",
+    "build": "tsc -p tsconfig.json && node scripts/fix-esm-ext.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx scripts/test-pack.mjs",
+    "validate": "tsx scripts/validate-config.mjs --structure-only",
+    "validate:paths": "tsx scripts/validate-config.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "pngjs": ">=7.0.0",
+    "pixelmatch": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "pngjs": {
+      "optional": true
+    },
+    "pixelmatch": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
+}

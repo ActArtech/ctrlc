@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CtrlC Sample Capture Page</title>
+  <style>
+    :root {
+      --color-bg: #0f172a;
+      --color-surface: #1e293b;
+      --color-text: #f8fafc;
+      --color-muted: #94a3b8;
+      --color-accent: #38bdf8;
+      --color-accent-hover: #7dd3fc;
+      --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --font-display: Georgia, "Times New Roman", serif;
+      --space: 1.5rem;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.5;
+    }
+    a { color: var(--color-accent); }
+    header[data-section="header"] {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: var(--color-surface);
+      border-bottom: 1px solid #334155;
+    }
+    header .logo { font-weight: 700; letter-spacing: 0.02em; }
+    header nav a {
+      margin-left: 1.25rem;
+      text-decoration: none;
+      color: var(--color-muted);
+    }
+    header nav a:hover { color: var(--color-text); }
+    section[data-section="hero"] {
+      padding: 4rem 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    section[data-section="hero"] h1 {
+      font-family: var(--font-display);
+      font-size: 2.75rem;
+      margin: 0 0 1rem;
+    }
+    section[data-section="hero"] p {
+      color: var(--color-muted);
+      font-size: 1.125rem;
+      max-width: 36rem;
+      margin: 0 auto 1.5rem;
+    }
+    section[data-section="hero"] .hero-art {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+      display: block;
+      border-radius: 16px;
+    }
+    section[data-section="features"] {
+      padding: 3rem 2rem;
+      background: var(--color-surface);
+    }
+    section[data-section="features"] h2 {
+      text-align: center;
+      margin: 0 0 2rem;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .feature-card {
+      padding: 1.25rem;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      background: var(--color-bg);
+    }
+    .feature-card h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+    .feature-card p { margin: 0; color: var(--color-muted); font-size: 0.95rem; }
+    section[data-section="cta"] {
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    section[data-section="cta"] h2 { margin: 0 0 0.75rem; }
+    section[data-section="cta"] p {
+      color: var(--color-muted);
+      margin: 0 0 1.5rem;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-accent);
+      color: #0f172a;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--color-accent-hover); }
+    footer {
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--color-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid #334155;
+    }
+    @media (max-width: 768px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      section[data-section="hero"] h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header data-section="header" aria-label="Site header">
+    <div class="logo">CtrlC Sample</div>
+    <nav aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#cta">Get started</a>
+    </nav>
+  </header>
+
+  <main>
+    <section data-section="hero" aria-label="Hero" id="hero">
+      <!-- 64x64 sky-blue square as data URI (fixture image) -->
+      <img
+        class="hero-art"
+        width="120"
+        height="120"
+        alt="Sample product mark"
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='16' fill='%2338bdf8'/%3E%3Ctext x='60' y='68' text-anchor='middle' font-family='sans-serif' font-size='28' fill='%230f172a'%3EPC%3C/text%3E%3C/svg%3E"
+      />
+      <h1>Rebuild pages as React sections</h1>
+      <p>
+        Sample multi-section landing page for capture IR fixtures.
+        Header, hero, features, and call-to-action landmarks.
+      </p>
+      <a class="btn" href="#cta">View call to action</a>
+    </section>
+
+    <section data-section="features" aria-label="Features" id="features">
+      <h2>Features</h2>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Page IR</h3>
+          <p>Normalized sections, tokens, and assets for agent rebuild.</p>
+        </article>
+        <article class="feature-card">
+          <h3>SectionPack</h3>
+          <p>Natural language briefs plus multi-file code export per section.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Specs first</h3>
+          <p>Interaction models and multi-state checklists before coding.</p>
+        </article>
+      </div>
+    </section>
+
+    <section data-section="cta" aria-label="Call to action" id="cta">
+      <h2>Ready to capture</h2>
+      <p>Use this fixture HTML with ctrlc capture tests (no live network).</p>
+      <button type="button" class="btn">Start free</button>
+    </section>
+  </main>
+
+  <footer data-section="footer" aria-label="Site footer">
+    Fixture only. Not a production site.
+  </footer>
+</body>
+</html>

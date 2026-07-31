@@ -1,0 +1,87 @@
+{
+  "sourceUrl": "https://example.com/landing",
+  "title": "Example Landing (external capture sample)",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "sections": [
+    {
+      "id": "site-header",
+      "label": "Site header",
+      "interactionModel": "click",
+      "selector": "header[data-section=\"header\"]",
+      "textSample": "Example Product Features Pricing Login",
+      "boundingBox": { "x": 0, "y": 0, "width": 1440, "height": 64 },
+      "styles": {
+        "display": "flex",
+        "backgroundColor": "#0f172a",
+        "color": "#f8fafc"
+      },
+      "childrenHints": ["nav", "a"]
+    },
+    {
+      "id": "hero",
+      "label": "Hero",
+      "interactionModel": "scroll",
+      "selector": "section.hero",
+      "textSample": "Ship faster with React sections Rebuild pages as composable packs",
+      "boundingBox": { "x": 0, "y": 64, "width": 1440, "height": 480 },
+      "styles": {
+        "backgroundColor": "#020617",
+        "color": "#f8fafc",
+        "fontFamily": "Inter, system-ui, sans-serif"
+      },
+      "childrenHints": ["h1", "p", "a", "img"]
+    },
+    {
+      "id": "features",
+      "name": "Features",
+      "interaction": "static",
+      "textSample": "Page IR SectionPack Specs first Dual export",
+      "childrenHints": ["h2", "ul"]
+    },
+    {
+      "id": "call-to-action",
+      "label": "Call to action",
+      "interactionModel": "click",
+      "textSample": "Get started free No credit card required"
+    },
+    {
+      "id": "site-footer",
+      "label": "Site footer",
+      "interactionModel": "static",
+      "textSample": "Copyright Example Inc."
+    }
+  ],
+  "tokens": {
+    "colors": ["#0f172a", "#38bdf8", "#f8fafc", "#020617"],
+    "fonts": ["Inter", "system-ui"],
+    "cssVariables": {
+      "--color-bg": "#0f172a",
+      "--color-accent": "#38bdf8",
+      "--color-text": "#f8fafc",
+      "--font-sans": "Inter, system-ui, sans-serif"
+    }
+  },
+  "assets": [
+    {
+      "url": "https://example.com/images/hero.png",
+      "kind": "image",
+      "path": "public/images/hero.png"
+    },
+    {
+      "url": "https://example.com/fonts/Inter.woff2",
+      "kind": "font"
+    }
+  ],
+  "fileMap": {
+    "components/sections/Hero.tsx": "export function Hero() { return <section className=\"hero\">Ship faster</section> }",
+    "components/sections/Features.tsx": "export function Features() { return <section>Features</section> }",
+    "public/images/logo.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"/>",
+    "package.json": "{ \"name\": \"external-sample\" }"
+  },
+  "notes": [
+    "Fixture for B6 external capture adapter (not a live Ditto export)."
+  ]
+}

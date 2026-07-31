@@ -1,0 +1,49 @@
+{
+  "name": "@ctrlc/react",
+  "version": "0.1.0",
+  "description": "SectionPack React UI: provider, boundary chips, pack overlay, multi-select tray",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles/section-pack.css": "./styles/section-pack.css",
+    "./styles.css": "./styles/section-pack.css",
+    "./section-pack.css": "./styles/section-pack.css"
+  },
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "clean:legacy": "node --input-type=module -e \"import fs from 'node:fs'; import path from 'node:path'; const dir = path.join(process.cwd(), 'src'); for (const f of ['VerticalSliceProvider.tsx','SectionSliceBoundary.tsx','SliceOverlay.tsx','MarketingBodySlice.tsx','_delete_stubs.ps1']) { try { fs.unlinkSync(path.join(dir, f)); } catch {} }\"",
+    "build": "npm run clean:legacy && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

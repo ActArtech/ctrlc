@@ -1,0 +1,47 @@
+{
+  "name": "@ctrlc/capture",
+  "version": "0.1.0",
+  "description": "CtrlC page capture: Playwright recon into Page IR for React rebuild (never HTML dumps).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "fixtures"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/fix-esm-ext.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx scripts/test-ids.mjs && tsx scripts/test-ir.mjs && tsx scripts/test-materialize.mjs",
+    "test:ids": "tsx scripts/test-ids.mjs",
+    "test:ir": "tsx scripts/test-ir.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "playwright": ">=1.40.0"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

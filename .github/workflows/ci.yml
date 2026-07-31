@@ -1,0 +1,55 @@
+# CI: install, build, test, optional validate. Docker demo is not required here.
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    name: Install · build · test · validate · pack drift
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Typecheck workspaces
+        run: npm run typecheck
+
+      - name: Tests (core + CLI + capture)
+        run: npm test
+
+      - name: Validate (structure-only core)
+        run: npm run validate
+
+      - name: Validate demo packs (paths)
+        run: npm run validate:demo
+
+      - name: Check SectionPack contentHash drift
+        run: |
+          if [ ! -f examples/next-demo/.ctrlc/snapshots/hero.json ]; then
+            echo "No committed baselines under examples/next-demo/.ctrlc/snapshots/"
+            echo "Generating now so the job log shows expected hashes; commit those files for stable CI."
+            npm run snapshot
+            exit 1
+          fi
+          npm run check:drift

@@ -1,0 +1,37 @@
+{
+  "name": "@ctrlc/clone-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Empty CtrlC clone host: SectionPack wired, no demo sections. Use with ctrlc init-clone or copy this folder.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev -p 3041",
+    "build": "next build",
+    "start": "next start -p 3041",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "ctrlc": "ctrlc",
+    "validate": "ctrlc validate --cwd .",
+    "qa": "ctrlc qa --cwd .",
+    "list": "ctrlc list --cwd .",
+    "scan": "ctrlc scan --cwd ."
+  },
+  "dependencies": {
+    "@ctrlc/core": "file:../../packages/core",
+    "@ctrlc/next": "file:../../packages/next",
+    "@ctrlc/react": "file:../../packages/react",
+    "next": "^15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@ctrlc/cli": "file:../../packages/cli",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "typescript": "^5.8.2"
+  }
+}

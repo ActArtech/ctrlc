@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "noEmit": false
+  },
+  "include": [
+    "src/cn.ts",
+    "src/types.ts",
+    "src/useSectionPackMode.ts",
+    "src/SectionPackProvider.tsx",
+    "src/SectionBoundary.tsx",
+    "src/PackOverlay.tsx",
+    "src/SectionPackRegion.tsx",
+    "src/index.ts"
+  ],
+  "exclude": ["dist", "node_modules"]
+}
