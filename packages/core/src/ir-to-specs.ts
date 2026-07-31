@@ -139,6 +139,98 @@ function changesForBreakpoint(
 }
 
 /**
+ * Map capture `section.text` → content slots for the spec table / scaffold.
+ */
+export function contentSlotsFromIrText(
+  text?: PageIrSection["text"] | null,
+): Record<string, string> {
+  if (!text || typeof text !== "object") return {};
+  const slots: Record<string, string> = {};
+  const headings = Array.isArray(text.headings)
+    ? text.headings.map(String).filter(Boolean)
+    : [];
+  const paragraphs = Array.isArray(text.paragraphs)
+    ? text.paragraphs.map(String).filter(Boolean)
+    : [];
+  const listItems = Array.isArray(text.listItems)
+    ? text.listItems.map(String).filter(Boolean)
+    : [];
+  const ctas = Array.isArray(text.ctas) ? text.ctas : [];
+
+  if (text.eyebrow) slots.eyebrow = String(text.eyebrow);
+  if (headings[0]) slots.title = headings[0];
+  if (headings.length > 1) slots.subtitle = headings.slice(1, 3).join(" · ");
+  if (paragraphs.length) slots.body = paragraphs.slice(0, 3).join("\n\n");
+  if (listItems.length) {
+    slots.listItems = listItems
+      .slice(0, 12)
+      .map((x) => `- ${x}`)
+      .join("\n");
+  }
+
+  const primary =
+    ctas.find((c) => String(c?.role || "") === "primary") || ctas[0];
+  const secondary =
+    ctas.find((c) => String(c?.role || "") === "secondary") ||
+    (ctas.length > 1 ? ctas[1] : undefined);
+  if (primary?.label) {
+    slots.primaryCta = String(primary.label);
+    if (primary.href) slots.primaryCtaHref = String(primary.href);
+  }
+  if (secondary?.label) {
+    slots.secondaryCta = String(secondary.label);
+    if (secondary.href) slots.secondaryCtaHref = String(secondary.href);
+  }
+  if (ctas.length > 2) {
+    slots.otherCtas = ctas
+      .slice(2, 8)
+      .map((c) =>
+        c?.href ? `${c.label || ""} (${c.href})` : String(c?.label || ""),
+      )
+      .filter(Boolean)
+      .join("; ");
+  }
+  return slots;
+}
+
+/** Markdown block describing structured IR text for builders. */
+export function formatStructuredTextBlock(
+  text?: PageIrSection["text"] | null,
+): string {
+  if (!text || typeof text !== "object") {
+    return "_(no structured text on IR — fill slots from recon or legacy textSample)_";
+  }
+  const lines: string[] = [];
+  if (text.eyebrow) lines.push(`- **eyebrow:** ${text.eyebrow}`);
+  if (Array.isArray(text.headings) && text.headings.length) {
+    lines.push("- **headings:**");
+    for (const h of text.headings.slice(0, 12)) lines.push(`  - ${h}`);
+  }
+  if (Array.isArray(text.paragraphs) && text.paragraphs.length) {
+    lines.push("- **paragraphs:**");
+    for (const p of text.paragraphs.slice(0, 8)) lines.push(`  - ${p}`);
+  }
+  if (Array.isArray(text.listItems) && text.listItems.length) {
+    lines.push("- **listItems:**");
+    for (const li of text.listItems.slice(0, 16)) lines.push(`  - ${li}`);
+  }
+  if (Array.isArray(text.ctas) && text.ctas.length) {
+    lines.push("- **ctas:**");
+    for (const c of text.ctas.slice(0, 12)) {
+      const role = c?.role ? ` [${c.role}]` : "";
+      const href = c?.href ? ` → \`${c.href}\`` : "";
+      lines.push(`  - ${c?.label || "(unnamed)"}${role}${href}`);
+    }
+  }
+  if (Array.isArray(text.labels) && text.labels.length) {
+    lines.push(`- **labels:** ${text.labels.slice(0, 10).join("; ")}`);
+  }
+  return lines.length
+    ? lines.join("\n")
+    : "_(empty structured text)_";
+}
+
+/**
  * One section in Page IR v0.
  * Compatible with `@ctrlc/capture` PageIRSection (+ optional enrichments).
  */
@@ -151,8 +243,20 @@ export type PageIrSection = {
   order?: number;
   selector?: string;
   boundingBox?: { x?: number; y?: number; width?: number; height?: number };
-  /** Short free-text sample of visible copy */
+  /** Short free-text sample of visible copy (legacy / summary) */
   textSample?: string;
+  /**
+   * Structured section copy from capture (preferred).
+   * headings, paragraphs, listItems, ctas — not one giant blob.
+   */
+  text?: {
+    eyebrow?: string;
+    headings?: string[];
+    paragraphs?: string[];
+    listItems?: string[];
+    ctas?: Array<{ label?: string; href?: string; role?: string }>;
+    labels?: string[];
+  };
   /** Slot → text map (eyebrow, title, body, CTAs, ...) */
   content?: Record<string, string>;
   /** Semantic DOM outline (text block) */
@@ -275,7 +379,13 @@ DOM outline (semantic):
 |------|------|
 {{contentRows}}
 
-## Text sample
+## Structured text (from IR)
+
+Headings, paragraphs, lists, and CTAs extracted during capture (preferred over a single blob).
+
+{{structuredText}}
+
+## Text sample (summary)
 
 {{textSample}}
 
@@ -423,15 +533,24 @@ export function behaviorFromIRSection(
  */
 export function irSectionToSpecInput(section: PageIrSection): SpecToBehaviorInput {
   const label = section.label || section.id;
-  const textHint = section.textSample
-    ? [`Text sample: ${truncate(section.textSample, 160)}`]
-    : [];
-  const contentHints = section.content
-    ? Object.entries(section.content)
-        .filter(([, v]) => v)
-        .slice(0, 6)
-        .map(([k, v]) => `${k}: ${truncate(String(v), 80)}`)
-    : [];
+  const slots = {
+    ...contentSlotsFromIrText(section.text),
+    ...(section.content ?? {}),
+  };
+  const textHint: string[] = [];
+  if (slots.title) textHint.push(`Title: ${truncate(slots.title, 100)}`);
+  if (slots.body) textHint.push(`Body: ${truncate(slots.body, 120)}`);
+  if (slots.primaryCta) textHint.push(`Primary CTA: ${slots.primaryCta}`);
+  if (slots.listItems) {
+    textHint.push(`List: ${truncate(slots.listItems.replace(/\n/g, " "), 120)}`);
+  }
+  if (!textHint.length && section.textSample) {
+    textHint.push(`Text sample: ${truncate(section.textSample, 160)}`);
+  }
+  const contentHints = Object.entries(slots)
+    .filter(([, v]) => v)
+    .slice(0, 8)
+    .map(([k, v]) => `${k}: ${truncate(String(v), 80)}`);
 
   const structureHint =
     section.structure ||
@@ -505,30 +624,42 @@ export function renderSectionSpecMarkdown(
     section.description ||
     `Section "${label}" rebuilt as a React component for the target page.`;
 
-  const content = { ...(section.content ?? {}) };
-  if (section.textSample && !content.title && !content.body) {
-    // Prefer structured slots; else put sample under "other"
-    content.other = content.other || section.textSample;
+  const content = {
+    ...contentSlotsFromIrText(section.text),
+    ...(section.content ?? {}),
+  };
+  if (section.textSample && !content.title && !content.body && !content.other) {
+    // Legacy IR: only textSample present
+    content.other = section.textSample;
   }
 
   const slotOrder = [
     "eyebrow",
     "title",
+    "subtitle",
     "body",
+    "listItems",
     "primaryCta",
+    "primaryCtaHref",
     "secondaryCta",
+    "secondaryCtaHref",
+    "otherCtas",
     "other",
   ];
   const slotKeys = [
-    ...slotOrder.filter((k) => content[k] != null),
-    ...Object.keys(content).filter((k) => !slotOrder.includes(k)),
+    ...slotOrder.filter((k) => content[k] != null && String(content[k]).trim()),
+    ...Object.keys(content).filter(
+      (k) => !slotOrder.includes(k) && String(content[k] ?? "").trim(),
+    ),
   ];
   const contentRows =
     slotKeys.length > 0
       ? slotKeys
           .map((k) => `| ${k} | ${escapeCell(content[k] ?? "")} |`)
           .join("\n")
-      : "| eyebrow | |\n| title | |\n| body | |\n| primaryCta | |\n| secondaryCta | |\n| other | |";
+      : "| eyebrow | |\n| title | |\n| body | |\n| listItems | |\n| primaryCta | |\n| secondaryCta | |\n| other | |";
+
+  const structuredBlock = formatStructuredTextBlock(section.text);
 
   const assets =
     section.assets?.length
@@ -579,6 +710,7 @@ export function renderSectionSpecMarkdown(
     interactionModel: model,
     structure: structureBlock,
     contentRows,
+    structuredText: structuredBlock,
     textSample: section.textSample?.trim() || "(none)",
     assetRows,
     styleRows,

@@ -53,3 +53,6 @@ runs/
 # Optional local worktrees / OS junk
 *.swp
 *~
+
+# Local research clones (do not ship third-party repos wholesale)
+docs/research/impeccable-ref/

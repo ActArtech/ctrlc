@@ -22,7 +22,7 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "npm run build -w @ctrlc/core && npm run build -w @ctrlc/react && npm run build -w @ctrlc/next && npm run build -w @ctrlc/capture",
+    "build": "npm run build -w @ctrlc/core && npm run build -w @ctrlc/react && npm run build -w @ctrlc/next && npm run build -w @ctrlc/capture && npm run build -w @ctrlc/cli",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test -w @ctrlc/core && npm run test -w @ctrlc/cli && npm run test -w @ctrlc/capture",
     "test:mcp": "npm run test -w @ctrlc/mcp",

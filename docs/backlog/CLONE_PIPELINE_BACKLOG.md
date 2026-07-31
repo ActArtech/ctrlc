@@ -28,10 +28,15 @@ Implementable backlog derived from studying **Ditto** (deterministic capture) an
 | ID | Item | Pri | Status | Notes |
 |----|------|-----|--------|-------|
 | B1 | Define Page IR schema v0 | P0 | **done** | `PageIR` in `packages/capture/src/ir.ts` + compatible types in `packages/core/src/ir-to-specs.ts` (sections-first v0) |
+| B1b | IR hygiene (noise/dedupe/short ids) | P1 | **done** | `hygienizePageIR` in capture: drop empty/tiny nodes, dedupe, semantic ids (`hero`/`pricing`/`faq`/…); CLI `hygienize-ir`; applied on live `capture` |
+| B1c | scaffold-from-ir (React stubs) | P1 | **done** | `writeScaffoldFromIR` in core: components + `home.ts` + `page.tsx`; CLI `scaffold-from-ir`; pipeline step (hygiene optional) |
+| B1d | Richer section text model | P1 | **done** | IR `section.text` (headings, paragraphs, listItems, ctas); capture extract; specs structured block + slots; scaffold uses title/body/CTAs; `textSample` remains summary |
+| B4b | Asset pipeline (ext + friendly public) | P1 | **done** | Next `/_next/image` unwrap; Content-Type + magic-byte ext; logo/hero → `public/logos|images/` friendly names; pipeline passes `--public-dir` |
 | B2 | Playwright capture prototype | P0 | **done** | `packages/capture` + `ctrlc capture` (`capturePage`, optional playwright peer; page scope) |
 | B3 | IR → topology mapper | P1 | **done** | `writeTopologyFromIR` + `ctrlc specs-from-ir` (ordered table; capture heuristics still open) |
 | B4 | Asset materialization | P1 | **done** | `materializeAssets` + `ctrlc materialize-assets`; capture hook `materializeAssets: true` |
 | B5 | Token extraction from IR | P1 | **done** | `extractTokensFromIR` / `writeTokensFromIR` + `ctrlc tokens-from-ir` |
+| B5b | Token curation (top N + semantic `--ts-*`) | P1 | **done** | Role-based vars (`--ts-bg`, `--ts-ink`, `--ts-accent`, …); max colors/fonts; skill `ctrlc-design-tokens` (Impeccable-inspired, not vendored); CLI `--max-colors` / `--prefix` |
 | B6 | Optional Ditto API adapter | P3 | **done** | Adapter-only: `adaptExternalCaptureToPageIR` + `ctrlc adapt-ir` convert external file-map / section JSON → Page IR. **No** Ditto network calls, **no** vendored source |
 | B7 | Capture fixtures + tests | P1 | **done** | `packages/capture/fixtures/sample-page.html` + `sample-ir.json`; `scripts/test-ids.mjs` + `test-ir.mjs` + `test-materialize.mjs` |
 
@@ -126,7 +131,7 @@ Implementable backlog derived from studying **Ditto** (deterministic capture) an
 1. B1 IR schema - done  
 2. B2 Playwright single-page capture - done  
 3. B4 assets - done (`materialize-assets`)  
-4. B5 tokens - done (`tokens-from-ir`)  
+4. B5 / B5b tokens - done (`tokens-from-ir` curated semantic `--ts-*` + skill)  
 5. C1 spec writer from IR - done  
 6. D10/D11 registry + recipes from IR - done (`register-from-ir`)  
 

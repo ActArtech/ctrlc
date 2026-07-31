@@ -1,12 +1,33 @@
 /**
  * ctrlc qa — validate + list + optional build gate for clone projects.
+ *
+ * Flags:
+ *   --cwd <path>       Project root (default: process.cwd())
+ *   --config <path>    Section pack config module
+ *   --json             Machine-readable step report
+ *   --skip-build       Skip `npm run build` (prefer when `npm run dev` is running)
+ *   --no-build         Alias of --skip-build
  */
 
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
-import { flagString, flagBool, resolveCwd, resolveConfigPath } from "./args.mjs";
+import { flagBool, resolveCwd, resolveConfigPath } from "./args.mjs";
 import { loadSectionPackConfig } from "./load-config.mjs";
+
+/**
+ * Resolve which skip-build flag was used for messaging.
+ * Prefers --skip-build when both are set.
+ * @param {Record<string, string | boolean>} flags
+ * @returns {{ skip: boolean, label: string | null }}
+ */
+function resolveSkipBuild(flags) {
+  const skipBuild = flagBool(flags, "skip-build");
+  const noBuild = flagBool(flags, "no-build");
+  if (skipBuild) return { skip: true, label: "--skip-build" };
+  if (noBuild) return { skip: true, label: "--no-build" };
+  return { skip: false, label: null };
+}
 
 /**
  * @param {import("./args.mjs").ParsedArgs} args
@@ -14,7 +35,7 @@ import { loadSectionPackConfig } from "./load-config.mjs";
  */
 export async function cmdQa(args, core) {
   const cwd = resolveCwd(args.flags);
-  const skipBuild = flagBool(args.flags, "no-build");
+  const { skip: skipBuild, label: skipLabel } = resolveSkipBuild(args.flags);
   const asJson = flagBool(args.flags, "json");
   /** @type {{ step: string, ok: boolean, detail?: string }[]} */
   const steps = [];
@@ -95,15 +116,18 @@ export async function cmdQa(args, core) {
         ["run", "build"],
         { cwd, stdio: "pipe", encoding: "utf8", env: process.env },
       );
+      const raw = (r.stderr || r.stdout || "").slice(-500);
+      const hint =
+        "hint: if Next/dev may be running, try `ctrlc qa --skip-build`";
       steps.push({
         step: "npm-run-build",
         ok: r.status === 0,
-        detail:
-          r.status === 0
-            ? "build ok"
-            : (r.stderr || r.stdout || "").slice(-500),
+        detail: r.status === 0 ? "build ok" : `${raw}\n${hint}`.trim(),
       });
       if (r.status !== 0) {
+        if (!asJson) {
+          console.error(`qa: ${hint}`);
+        }
         fail(steps, asJson);
         return;
       }
@@ -115,7 +139,11 @@ export async function cmdQa(args, core) {
       });
     }
   } else {
-    steps.push({ step: "npm-run-build", ok: true, detail: "skipped (--no-build)" });
+    steps.push({
+      step: "npm-run-build",
+      ok: true,
+      detail: `skipped (${skipLabel})`,
+    });
   }
 
   // 6) F4 light check: existing specs should mention breakpoint matrix (warn only)

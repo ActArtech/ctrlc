@@ -12,7 +12,7 @@
    - **Natural language** (`describe`)
    - **Code as-is** (`prompt` / zip)  
 4. **Spec before build** — write `docs/research/components/<id>.spec.md` first.  
-5. **Build must compile** — `npm run build` / `ctrlc qa` before done.
+5. **Build must compile** — `npm run build` / `ctrlc qa` before done. While `npm run dev` is running, use `ctrlc qa --skip-build` for validate/list without a production build (`--no-build` alias).
 
 ## SectionPack auto-register (required)
 
@@ -60,6 +60,7 @@ docs/design-references/   # screenshots
 ctrlc validate --cwd .
 ctrlc list --cwd .
 ctrlc qa --cwd .
+ctrlc qa --cwd . --skip-build   # iterating with dev server
 ctrlc pack <id> --format describe --cwd .
 ctrlc pack <id> --format prompt-short --cwd .
 ```

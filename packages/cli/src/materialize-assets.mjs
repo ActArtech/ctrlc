@@ -127,6 +127,31 @@ export async function cmdMaterializeAssets(args) {
   const dryRun = flagBool(args.flags, "dry-run") || flagBool(args.flags, "dryRun");
   const overwrite =
     flagBool(args.flags, "overwrite") || flagBool(args.flags, "in-place");
+  const noFriendly = flagBool(args.flags, "no-friendly");
+
+  // Friendly public copies: --public-dir or default project public/ next to IR / cwd
+  const publicDirFlag =
+    flagString(args.flags, "public-dir") ||
+    flagString(args.flags, "publicDir");
+  /** @type {string | undefined} */
+  let publicDir;
+  if (publicDirFlag) {
+    publicDir = path.isAbsolute(publicDirFlag)
+      ? publicDirFlag
+      : path.resolve(process.cwd(), publicDirFlag);
+  } else if (publicFlag) {
+    // --public path/to/public already resolved partially above
+    const pub = path.isAbsolute(publicFlag)
+      ? publicFlag
+      : path.resolve(process.cwd(), publicFlag);
+    publicDir = path.basename(pub) === "public" ? pub : path.join(pub, "public");
+  } else {
+    // Default: <cwd>/public when materializing into a clone project
+    const guess = path.resolve(process.cwd(), "public");
+    if (fs.existsSync(guess) || !noFriendly) {
+      publicDir = guess;
+    }
+  }
 
   const outIrFlag = flagString(args.flags, "out-ir") || flagString(args.flags, "outIr");
   /** @type {string | undefined} */
@@ -157,6 +182,9 @@ export async function cmdMaterializeAssets(args) {
   console.log(`ctrlc materialize-assets`);
   console.log(`  ir:     ${irPath}`);
   console.log(`  out:    ${outDir}`);
+  if (publicDir && !noFriendly) {
+    console.log(`  public: ${publicDir} (logo/hero friendly copies)`);
+  }
   console.log(`  dryRun: ${dryRun ? "yes" : "no"}`);
   console.log("");
 
@@ -176,16 +204,31 @@ export async function cmdMaterializeAssets(args) {
       concurrency,
       timeoutMs,
       outIrPath,
+      publicDir: noFriendly ? undefined : publicDir,
+      friendlyPublic: !noFriendly && Boolean(publicDir),
     });
 
     const ok = result.written.filter((w) => w.ok).length;
     const failed = result.written.filter((w) => !w.ok).length;
+    const rewritten = result.written.filter((w) => w.rewritten).length;
 
-    console.log(`Assets: ${result.written.length} total, ${ok} ok, ${failed} failed`);
+    console.log(
+      `Assets: ${result.written.length} total, ${ok} ok, ${failed} failed` +
+        (rewritten ? `, ${rewritten} Next image URLs rewritten` : ""),
+    );
     for (const w of result.written) {
       const mark = w.ok ? "ok  " : "FAIL";
       const err = w.error ? ` (${w.error})` : "";
-      console.log(`  ${mark}  ${w.localPath}${err}`);
+      const rew = w.rewritten ? " [next→src]" : "";
+      const pub = w.publicPath ? ` → public/${w.publicPath}` : "";
+      console.log(`  ${mark}  ${w.localPath}${rew}${pub}${err}`);
+    }
+    if (result.publicCopies?.length) {
+      console.log("");
+      console.log(`Friendly public copies: ${result.publicCopies.length}`);
+      for (const c of result.publicCopies) {
+        console.log(`  ${c.role.padEnd(8)} ${c.to}`);
+      }
     }
 
     if (!dryRun) {
@@ -222,21 +265,29 @@ function printHelp() {
 Usage:
   ctrlc materialize-assets --ir <path> [--out <dir>] [--out-ir <path>]
   ctrlc materialize-assets --ir <path> --public public
+  ctrlc materialize-assets --ir <path> --public-dir ./public
   ctrlc materialize-assets --ir <path> --dry-run
 
 Options:
   --ir <file>           Page IR JSON (required)
-  --out, -o <dir>       Directory for files (default: <cwd>/public/ctrlc-assets)
-  --public <dir>        Project public/ dir; writes under <dir>/ctrlc-assets
-                        when basename is "public"
+  --out, -o <dir>       Hashed assets dir (default: <cwd>/public/ctrlc-assets)
+  --public <dir>        Project public/ dir; hashed files under <dir>/ctrlc-assets
+                        when basename is "public"; also enables friendly copies
+  --public-dir <dir>    Copy logo/hero/favicon/og into this public root with
+                        friendly names (logos/logo.png, images/hero.webp)
+  --no-friendly         Skip friendly public copies
   --out-ir <file>       Write updated IR here (default: <ir>.materialized.json)
   --overwrite           Overwrite original IR (writes .bak first)
   --dry-run             Compute localPath names only; no download / no IR write
   --concurrency <n>     Parallel downloads (default 4)
   --timeout <ms>        Per-request timeout (default 30000)
 
+Also:
+  - Unwraps Next.js /_next/image?url=… to the real source when possible
+  - Prefers real extensions (path, Content-Type, magic bytes) over .bin
+
 Examples:
-  ctrlc materialize-assets --ir runs/demo/ir.json
+  ctrlc materialize-assets --ir runs/demo/ir.json --public-dir ./public
   ctrlc materialize-assets --ir runs/demo/ir.json --out runs/demo/assets
   ctrlc materialize-assets --ir ir.json --public ./public --overwrite
 

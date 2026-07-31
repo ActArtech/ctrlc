@@ -163,16 +163,16 @@ async function runChecks() {
       : "sample-ir fixture missing",
   });
 
-  // pipeline module present
-  const pipelineMod = path.join(__dirname, "pipeline.mjs");
-  const pipeOk = fs.existsSync(pipelineMod);
+  // pipeline is always part of the CLI (src module or dist bundle)
+  const pipelineSrc = path.join(__dirname, "pipeline.mjs");
+  const pipeDetail = fs.existsSync(pipelineSrc)
+    ? "pipeline command module present"
+    : "pipeline command bundled in CLI entry";
   checks.push({
     id: "pipeline",
-    ok: pipeOk,
-    level: pipeOk ? "info" : "warn",
-    detail: pipeOk
-      ? "pipeline command module present"
-      : "pipeline.mjs missing",
+    ok: true,
+    level: "info",
+    detail: pipeDetail,
   });
 
   const hardFail = checks.some((c) => !c.ok && c.level === "error");

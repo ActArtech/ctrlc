@@ -65,9 +65,44 @@ const {
   stableAssetFilename,
   materializeAssets,
   materializeAssetsFromFile,
+  resolveAssetFetchUrl,
+  detectAssetRole,
+  friendlyPublicRelPath,
+  extFromMagicBytes,
 } = mod;
 
 console.log("@ctrlc/capture materialize-assets tests\n");
+
+// --- Next.js image URL rewrite ---
+console.log("resolveAssetFetchUrl (Next image)");
+const nextUrl =
+  "https://tosea.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo.abc123.png&w=256&q=75";
+const resolved = resolveAssetFetchUrl(nextUrl);
+assert(resolved.rewritten, "next image marked rewritten");
+assert(
+  resolved.fetchUrl.includes("/_next/static/media/logo"),
+  `unwraps to static media (${resolved.fetchUrl})`,
+);
+assert(!resolved.fetchUrl.includes("_next/image?"), "fetch URL is not optimizer");
+assert(resolved.hintExt === ".png", "hint ext .png from nested path");
+
+const absNested =
+  "https://cdn.example.com/_next/image?url=https%3A%2F%2Fcdn.example.com%2Fhero.webp&w=1200&q=80";
+const r2 = resolveAssetFetchUrl(absNested);
+assert(r2.rewritten, "absolute nested url rewritten");
+assert(r2.fetchUrl.includes("hero.webp"), "absolute nested resolved");
+assert(r2.hintExt === ".webp", "webp hint");
+
+assert(detectAssetRole(resolved.fetchUrl, "image") === "logo", "logo role from path");
+assert(detectAssetRole("https://x.com/images/hero-banner.jpg", "image") === "hero", "hero role");
+assert(friendlyPublicRelPath("logo", ".svg", 0) === "logos/logo.svg", "friendly logo path");
+assert(friendlyPublicRelPath("hero", ".webp", 1) === "images/hero-2.webp", "friendly hero-2");
+
+const png1 = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+  "base64",
+);
+assert(extFromMagicBytes(png1) === ".png", "magic bytes png");
 
 // --- stableAssetFilename ---
 console.log("stableAssetFilename");
@@ -77,8 +112,12 @@ const imgName = stableAssetFilename(imgUrl, "image", 0);
 assert(imgName.startsWith("img-"), "image kind prefix img-");
 assert(imgName.includes("example-com") || imgName.includes("cdn-example-com") || imgName.includes("cdn.example.com".replace(/\./g, "-")) || /cdn/.test(imgName), "includes host");
 assert(imgName.endsWith(".png"), "preserves .png");
-assert(imgName.includes(shortHash(imgUrl)), "includes sha256-8 of url");
+// hash is of resolved fetch URL
 assert(!/[/?%*:|"<>\\]/.test(imgName), "no unsafe path chars");
+
+const nextName = stableAssetFilename(nextUrl, "image", 0);
+assert(nextName.endsWith(".png"), "next image filename uses real .png");
+assert(!nextName.endsWith(".bin"), "next image not .bin");
 
 const fontUrl = "https://fonts.gstatic.com/s/inter/v12/UcCO3Fwr.woff2";
 const fontName = stableAssetFilename(fontUrl, "font", 1);
@@ -95,6 +134,38 @@ assertEq(
   stableAssetFilename(imgUrl, "image", 0),
   stableAssetFilename(imgUrl, "image", 0),
   "stable across calls",
+);
+
+// Friendly public copy for logo
+console.log("\nfriendly public copy");
+const pubRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ctrlc-pub-"));
+const logoUrl = "https://cdn.example.com/brand/logo.svg";
+const svgBody = Buffer.from(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>',
+);
+const pubResult = await materializeAssets(
+  makeIr([{ url: logoUrl, kind: "image" }]),
+  {
+    outDir: path.join(pubRoot, "assets"),
+    publicDir: path.join(pubRoot, "public"),
+    friendlyPublic: true,
+    fetchImpl: async () =>
+      new Response(svgBody, {
+        status: 200,
+        headers: { "content-type": "image/svg+xml" },
+      }),
+  },
+);
+assert(pubResult.written[0].ok, "logo download ok");
+assert(
+  pubResult.written[0].publicPath === "logos/logo.svg" ||
+    pubResult.publicCopies.some((c) => c.to.includes("logos/logo")),
+  `friendly logo path (${pubResult.written[0].publicPath})`,
+);
+assert(
+  fs.existsSync(path.join(pubRoot, "public", "logos", "logo.svg")) ||
+    fs.existsSync(path.join(pubRoot, "public", pubResult.written[0].publicPath || "")),
+  "logo file exists under public/",
 );
 
 // data: URL naming

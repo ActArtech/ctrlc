@@ -29,6 +29,7 @@ Never ship mirrored HTML dumps as the product.
 |------|----------------|
 | **Clone** | `init-clone`, capture IR, `pipeline`, `adapt-ir` (external file-map) |
 | **Specs** | `specs-from-ir`, templates, multi-state + breakpoint matrix |
+| **Scaffold** | `scaffold-from-ir` - React stubs + `home.ts` + `page.tsx` (also in `pipeline`) |
 | **Build** | `plan-parallel`, section-builder prompts, React-only host |
 | **SectionPack** | describe / prompt / zip / recipes / catalog + preview thumbs |
 | **Quality** | `qa`, `doctor`, baseline, optional `visual-diff` |

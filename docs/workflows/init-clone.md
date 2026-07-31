@@ -62,10 +62,11 @@ Also:
 
 ```bash
 ctrlc qa --cwd .
-ctrlc qa --cwd . --no-build
+ctrlc qa --cwd . --skip-build   # when npm run dev is running
+ctrlc qa --cwd . --no-build       # alias of --skip-build
 ```
 
-Runs: load config (+ registry) → validate → list → optional `npm run build`.
+Runs: load config (+ registry) → validate → list → optional `npm run build`. Prefer `--skip-build` while `npm run dev` is running (`--no-build` is an alias).
 
 ## Skill
 

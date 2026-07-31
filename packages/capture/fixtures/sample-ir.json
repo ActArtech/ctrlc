@@ -13,8 +13,13 @@
       "label": "Site header",
       "interactionModel": "click",
       "selector": "header[data-section=\"header\"]",
-      "boundingBox": { "x": 0, "y": 0, "width": 1440, "height": 64 },
-      "textSample": "CtrlC Sample Features Get started",
+      "boundingBox": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 64
+      },
+      "textSample": "Features Get started",
       "styles": {
         "display": "flex",
         "position": "static",
@@ -23,15 +28,43 @@
         "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
         "fontSize": "16px"
       },
-      "childrenHints": ["div", "nav"]
+      "childrenHints": [
+        "div",
+        "nav"
+      ],
+      "text": {
+        "headings": [],
+        "paragraphs": [],
+        "listItems": [],
+        "ctas": [
+          {
+            "label": "Features",
+            "href": "#features",
+            "role": "link"
+          },
+          {
+            "label": "Get started",
+            "href": "#cta",
+            "role": "primary"
+          }
+        ],
+        "labels": [
+          "CtrlC Sample"
+        ]
+      }
     },
     {
       "id": "hero",
       "label": "Hero",
       "interactionModel": "click",
       "selector": "section[data-section=\"hero\"]",
-      "boundingBox": { "x": 0, "y": 64, "width": 1440, "height": 420 },
-      "textSample": "Rebuild pages as React sections Sample multi-section landing page",
+      "boundingBox": {
+        "x": 0,
+        "y": 64,
+        "width": 1440,
+        "height": 420
+      },
+      "textSample": "Rebuild pages as React sections Sample multi-section landing page for capture fixtures. Get started",
       "styles": {
         "display": "block",
         "position": "static",
@@ -40,14 +73,41 @@
         "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
         "fontSize": "16px"
       },
-      "childrenHints": ["img", "h1", "p", "a"]
+      "childrenHints": [
+        "img",
+        "h1",
+        "p",
+        "a"
+      ],
+      "text": {
+        "eyebrow": "CtrlC sample",
+        "headings": [
+          "Rebuild pages as React sections"
+        ],
+        "paragraphs": [
+          "Sample multi-section landing page for capture fixtures."
+        ],
+        "listItems": [],
+        "ctas": [
+          {
+            "label": "Get started",
+            "href": "#cta",
+            "role": "primary"
+          }
+        ]
+      }
     },
     {
       "id": "features",
       "label": "Features",
       "interactionModel": "static",
       "selector": "section[data-section=\"features\"]",
-      "boundingBox": { "x": 0, "y": 484, "width": 1440, "height": 320 },
+      "boundingBox": {
+        "x": 0,
+        "y": 484,
+        "width": 1440,
+        "height": 320
+      },
       "textSample": "Features Page IR SectionPack Specs first",
       "styles": {
         "display": "block",
@@ -57,15 +117,35 @@
         "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
         "fontSize": "16px"
       },
-      "childrenHints": ["h2", "div"]
+      "childrenHints": [
+        "h2",
+        "div"
+      ],
+      "text": {
+        "headings": [
+          "Features"
+        ],
+        "paragraphs": [],
+        "listItems": [
+          "Page IR",
+          "SectionPack",
+          "Specs first"
+        ],
+        "ctas": []
+      }
     },
     {
       "id": "call-to-action",
       "label": "Call to action",
       "interactionModel": "click",
       "selector": "section[data-section=\"cta\"]",
-      "boundingBox": { "x": 0, "y": 804, "width": 1440, "height": 220 },
-      "textSample": "Ready to capture Use this fixture HTML with ctrlc capture tests",
+      "boundingBox": {
+        "x": 0,
+        "y": 804,
+        "width": 1440,
+        "height": 220
+      },
+      "textSample": "Ready to capture Use this fixture HTML with ctrlc capture tests Start free",
       "styles": {
         "display": "block",
         "position": "static",
@@ -74,15 +154,39 @@
         "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
         "fontSize": "16px"
       },
-      "childrenHints": ["h2", "p", "button"]
+      "childrenHints": [
+        "h2",
+        "p",
+        "button"
+      ],
+      "text": {
+        "headings": [
+          "Ready to capture"
+        ],
+        "paragraphs": [
+          "Use this fixture HTML with ctrlc capture tests"
+        ],
+        "listItems": [],
+        "ctas": [
+          {
+            "label": "Start free",
+            "role": "primary"
+          }
+        ]
+      }
     },
     {
       "id": "site-footer",
       "label": "Site footer",
       "interactionModel": "static",
       "selector": "footer[data-section=\"footer\"]",
-      "boundingBox": { "x": 0, "y": 1024, "width": 1440, "height": 56 },
-      "textSample": "Fixture only. Not a production site.",
+      "boundingBox": {
+        "x": 0,
+        "y": 1024,
+        "width": 1440,
+        "height": 56
+      },
+      "textSample": "Footer note",
       "styles": {
         "display": "block",
         "position": "static",
@@ -90,6 +194,14 @@
         "color": "rgb(148, 163, 184)",
         "fontFamily": "\"Segoe UI\", system-ui, -apple-system, sans-serif",
         "fontSize": "14px"
+      },
+      "text": {
+        "headings": [],
+        "paragraphs": [
+          "Footer note"
+        ],
+        "listItems": [],
+        "ctas": []
       }
     }
   ],

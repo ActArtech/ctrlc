@@ -57,7 +57,7 @@ Navigate to the target URL.
 1. Screenshots desktop 1440 + mobile 390 → `docs/design-references/`
 2. Interaction sweep (scroll before click) → `docs/research/BEHAVIORS.md`
 3. Topology top→bottom → `docs/research/PAGE_TOPOLOGY.md` with **INTERACTION MODEL** per section
-4. Tokens/fonts → `docs/research/DESIGN_TOKENS.md`
+4. Tokens/fonts → `docs/research/DESIGN_TOKENS.md` (prefer semantic `--ts-*` roles; skill `ctrlc-design-tokens`)
 
 ### Phase 1.5 - Capture IR (optional)
 
@@ -79,7 +79,7 @@ Expected artifacts (CtrlC-owned IR, not a third-party dump):
 | Step | Command / tool | Purpose |
 |------|----------------|---------|
 | Materialize assets | (B4) assets from IR → `public/` | Stable local image/font paths |
-| Tokens from IR | (B5) tokens → DESIGN_TOKENS / CSS vars | Shared foundation |
+| Tokens from IR | `ctrlc tokens-from-ir` (B5b curated `--ts-*` roles) | Shared foundation; see `ctrlc-design-tokens` skill |
 | Register from IR | `ctrlc specs-from-ir` then `register-from-spec` / `register` | Specs + SectionPack ids |
 | Baseline | `ctrlc baseline --ir runs/<host>/ir.json` or `--url` | F2: `docs/research/baselines/<host>-page.png` |
 

@@ -3,7 +3,9 @@
 Binary: **`CtrlC`**  
 From monorepo: `npm run ctrlc -- <command> ...`
 
-Requires `npm run build` so `@ctrlc/core` dist is available.
+Requires `npm run build` so `@ctrlc/core` dist and the CLI bundle (`packages/cli/dist/cli.mjs`) are available. `npm run build -w @ctrlc/cli` (or root `npm run build`) produces the esbuild bundle; `bin/ctrlc.mjs` prefers that file and falls back to `src/cli.mjs`.
+
+Normal commands do **not** require `tsx`. `tsx` is only loaded lazily when a host SectionPack config is TypeScript (`.ts` / `.mts`) via `load-config.mjs`.
 
 ## Commands
 
@@ -108,6 +110,7 @@ ctrlc capture https://example.com --out runs/example.com
 ctrlc adapt-ir --input external.json --out runs/adapted/ir.json
 ctrlc materialize-assets --ir runs/example.com/ir.json --out public/ctrlc-assets
 ctrlc tokens-from-ir --ir runs/example.com/ir.json --cwd .
+# optional: --max-colors 12 --max-fonts 4 --prefix ts --legacy-pc
 ctrlc register-from-ir --ir runs/example.com/ir.json --cwd .
 ctrlc specs-from-ir --ir runs/example.com/ir.json --cwd .
 ctrlc register-from-spec --cwd . --spec docs/research/components/hero.spec.md
@@ -118,6 +121,7 @@ ctrlc visual-diff --baseline a.png --candidate b.png --max-ratio 0.01
 ctrlc pipeline --ir runs/example.com/ir.json --cwd .
 ctrlc pipeline --url https://example.com --cwd . --out runs/example.com --dry-run
 ctrlc qa --cwd .
+ctrlc qa --cwd . --skip-build
 ctrlc doctor
 ```
 
@@ -126,16 +130,18 @@ ctrlc doctor
 | `init-clone` | Scaffold React host + research + registry |
 | `capture` | URL → Page IR (Playwright optional peer) |
 | `adapt-ir` | External file-map / capture JSON → Page IR |
-| `pipeline` | Orchestrate post-process chain |
-| `materialize-assets` | Download IR assets to disk |
-| `tokens-from-ir` | DESIGN_TOKENS.md + tokens.css |
+| `pipeline` | Orchestrate post-process chain (includes scaffold-from-ir) |
+| `hygienize-ir` | Drop noise, dedupe, short ids on IR |
+| `scaffold-from-ir` | IR → React stubs + home.ts + page.tsx |
+| `materialize-assets` | Download IR assets; Next image unwrap; logo/hero → public/ |
+| `tokens-from-ir` | Curated DESIGN_TOKENS.md + tokens.css (`--ts-bg`, `--ts-accent`, top N) |
 | `register-from-ir` | Registry + landing-core recipe |
 | `specs-from-ir` | section.spec.md + topology |
 | `register` / `register-from-spec` | Upsert one section |
 | `baseline` | Screenshot baseline for QA |
 | `plan-parallel` | Multi-agent section build plan |
 | `visual-diff` | PNG compare (optional pngjs + pixelmatch) |
-| `qa` | validate + list + optional build |
+| `qa` | validate + list + optional build (`--skip-build` / `--no-build` alias) |
 | `doctor` | Environment health |
 
 See [Hybrid clone pipeline](../workflows/hybrid-clone-pipeline.md).

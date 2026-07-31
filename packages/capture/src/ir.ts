@@ -27,12 +27,39 @@ export interface PageIRViewport {
   height: number;
 }
 
+/** Clickable label within a section (link or button). */
+export interface PageIRCta {
+  label: string;
+  href?: string;
+  /** Heuristic: primary | secondary | button | link */
+  role?: string;
+}
+
+/**
+ * Structured copy for one section (preferred over a single textSample blob).
+ * Capture fills this; textSample remains a short join for legacy tools.
+ */
+export interface PageIRSectionText {
+  eyebrow?: string;
+  headings: string[];
+  paragraphs: string[];
+  listItems: string[];
+  ctas: PageIRCta[];
+  labels?: string[];
+}
+
 export interface PageIRSection {
   id: string;
   label: string;
   interactionModel: InteractionModel;
   selector?: string;
   boundingBox?: PageIRBoundingBox;
+  /**
+   * Structured headings / paragraphs / lists / CTAs.
+   * Prefer this for rebuilds; keep textSample as a short summary.
+   */
+  text?: PageIRSectionText;
+  /** Compact free-text summary (derived from `text` when structured). */
   textSample?: string;
   styles?: Record<string, string>;
   childrenHints?: string[];

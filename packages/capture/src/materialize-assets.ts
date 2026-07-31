@@ -1,18 +1,30 @@
 /**
  * Materialize Page IR assets[] into a local directory with stable filenames.
  *
- * Downloads fonts/images/video/other from remote URLs (or small data: URLs),
- * sets asset.localPath, and optionally rewrites IR. Never throws on a single
- * asset failure - errors are collected in the result.
+ * - Rewrites Next.js `/_next/image?url=` to the real source when possible
+ * - Prefers real extensions (path, Content-Type, magic bytes) over `.bin`
+ * - Optionally copies logo/hero/favicon/og into project `public/` with friendly names
+ *
+ * Never throws on a single asset failure - errors are collected in the result.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import type { PageIR, PageIRAsset, PageIRAssetKind } from "./ir";
+import {
+  resolveAssetFetchUrl,
+  detectAssetRole,
+  friendlyPublicRelPath,
+  extFromContentType,
+  extFromMagicBytes,
+  normalizeExt,
+  extFromPathname,
+  type AssetRole,
+} from "./asset-urls";
 
 export type MaterializeAssetsOptions = {
-  /** Directory where files are written. */
+  /** Directory where hashed capture assets are written. */
   outDir: string;
   /** Mutate ir.assets[].localPath (default true). */
   rewriteIr?: boolean;
@@ -24,6 +36,15 @@ export type MaterializeAssetsOptions = {
   dryRun?: boolean;
   /** Optional fetch for tests (Node 20+ global fetch by default). */
   fetchImpl?: typeof fetch;
+  /**
+   * Project public/ directory (or parent project cwd's public).
+   * When set, logo/hero/favicon/og copies go here with friendly names.
+   */
+  publicDir?: string;
+  /** Copy logo/hero/favicon/og into publicDir (default true when publicDir set). */
+  friendlyPublic?: boolean;
+  /** Base URL for resolving relative asset URLs (usually IR sourceUrl). */
+  pageBase?: string;
 };
 
 export type MaterializeWritten = {
@@ -31,12 +52,19 @@ export type MaterializeWritten = {
   localPath: string;
   ok: boolean;
   error?: string;
+  /** Resolved fetch URL when Next image was unwrapped */
+  fetchUrl?: string;
+  rewritten?: boolean;
+  /** Friendly public path if copied (e.g. logos/logo.png) */
+  publicPath?: string;
+  role?: AssetRole;
 };
 
 export type MaterializeAssetsResult = {
   ir: PageIR;
   written: MaterializeWritten[];
   outDir: string;
+  publicCopies: Array<{ role: AssetRole; from: string; to: string }>;
 };
 
 /** Max data: URL payload to write (bytes). Larger ones are skipped. */
@@ -49,57 +77,6 @@ const KIND_PREFIX: Record<PageIRAssetKind, string> = {
   other: "other",
 };
 
-const KNOWN_EXTS = new Set([
-  ".woff",
-  ".woff2",
-  ".ttf",
-  ".otf",
-  ".eot",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".gif",
-  ".svg",
-  ".webp",
-  ".avif",
-  ".ico",
-  ".bmp",
-  ".mp4",
-  ".webm",
-  ".ogg",
-  ".mov",
-  ".css",
-  ".js",
-  ".json",
-]);
-
-const MIME_EXT: Record<string, string> = {
-  "image/png": ".png",
-  "image/jpeg": ".jpg",
-  "image/jpg": ".jpg",
-  "image/gif": ".gif",
-  "image/svg+xml": ".svg",
-  "image/webp": ".webp",
-  "image/avif": ".avif",
-  "image/x-icon": ".ico",
-  "image/vnd.microsoft.icon": ".ico",
-  "font/woff": ".woff",
-  "font/woff2": ".woff2",
-  "font/ttf": ".ttf",
-  "font/otf": ".otf",
-  "application/font-woff": ".woff",
-  "application/font-woff2": ".woff2",
-  "application/x-font-ttf": ".ttf",
-  "application/x-font-otf": ".otf",
-  "video/mp4": ".mp4",
-  "video/webm": ".webm",
-  "video/ogg": ".ogg",
-  "text/css": ".css",
-  "application/javascript": ".js",
-  "text/javascript": ".js",
-  "application/json": ".json",
-};
-
 /**
  * Stable, filesystem-safe filename for an asset URL.
  * Pattern: `<kind>-<host>-<path-tail>-<sha256-8><ext>`
@@ -108,53 +85,79 @@ export function stableAssetFilename(
   url: string,
   kind: PageIRAssetKind,
   index: number,
+  opts?: { pageBase?: string; preferredExt?: string },
 ): string {
   const prefix = KIND_PREFIX[kind] ?? "other";
-  const hash = shortHash(url);
+  const resolved = resolveAssetFetchUrl(url, opts?.pageBase);
+  const hash = shortHash(resolved.fetchUrl || url);
 
   if (url.startsWith("data:")) {
     const mime = dataUrlMime(url);
-    const ext = (mime && MIME_EXT[mime]) || defaultExtForKind(kind);
-    return sanitizeFilename(`${prefix}-data-${index}-${hash}${ext}`);
+    const ext =
+      opts?.preferredExt ||
+      (mime &&
+        {
+          "image/png": ".png",
+          "image/jpeg": ".jpg",
+          "image/svg+xml": ".svg",
+          "image/webp": ".webp",
+          "image/gif": ".gif",
+        }[mime]) ||
+      defaultExtForKind(kind);
+    return sanitizeFilename(`${prefix}-data-${index}-${hash}${normalizeExt(ext) || ext}`);
   }
 
   let host = "asset";
-  let pathTail = "";
-  let ext = "";
+  let pathTail = resolved.hintName || "";
+  let ext =
+    opts?.preferredExt ||
+    resolved.hintExt ||
+    "";
 
   try {
-    const u = new URL(url);
+    const u = new URL(resolved.fetchUrl);
     host = sanitizeSegment(u.hostname.replace(/^www\./i, "")) || "asset";
-    const parts = u.pathname
-      .replace(/\/+$/, "")
-      .split("/")
-      .filter(Boolean)
-      .map((p) => {
-        try {
-          return decodeURIComponent(p);
-        } catch {
-          return p;
-        }
-      });
-    const last = parts[parts.length - 1] || "";
-    const prev = parts.length > 1 ? parts[parts.length - 2] : "";
-    const baseName = last.replace(/\.[a-z0-9]{1,8}$/i, "");
-    pathTail = [prev, baseName]
-      .filter(Boolean)
-      .map(sanitizeSegment)
-      .filter(Boolean)
-      .join("-");
-    ext = extFromPathname(u.pathname) || extFromContentHint(u) || "";
+    if (!pathTail) {
+      const parts = u.pathname
+        .replace(/\/+$/, "")
+        .split("/")
+        .filter(Boolean)
+        .map((p) => {
+          try {
+            return decodeURIComponent(p);
+          } catch {
+            return p;
+          }
+        });
+      const last = parts[parts.length - 1] || "";
+      const prev = parts.length > 1 ? parts[parts.length - 2] : "";
+      const baseName = last.replace(/\.[a-z0-9]{1,8}$/i, "");
+      pathTail = [prev, baseName]
+        .filter(Boolean)
+        .map(sanitizeSegment)
+        .filter(Boolean)
+        .join("-");
+    }
+    if (!ext) {
+      ext = extFromPathname(u.pathname) || "";
+      const format = u.searchParams.get("format") || u.searchParams.get("f");
+      if (!ext && format) {
+        const f = normalizeExt(`.${format}`);
+        if (f) ext = f;
+      }
+    }
   } catch {
-    pathTail = sanitizeSegment(url.slice(0, 48));
+    pathTail = pathTail || sanitizeSegment(url.slice(0, 48));
   }
 
+  // Prefer real image/font extensions; only fall back to .bin when unknown
   if (!ext) ext = defaultExtForKind(kind);
+  // Avoid useless .bin when we have a name hint that includes an ext-like suffix
+  if (ext === ".bin" && resolved.hintExt) ext = resolved.hintExt;
 
   const body = [prefix, host, pathTail].filter(Boolean).join("-");
-  // Cap body length so final name stays reasonable on Windows
   const trimmed = body.length > 96 ? body.slice(0, 96) : body;
-  return sanitizeFilename(`${trimmed}-${hash}${ext}`);
+  return sanitizeFilename(`${trimmed}-${hash}${normalizeExt(ext) || ext}`);
 }
 
 /**
@@ -175,12 +178,17 @@ export async function materializeAssets(
   const timeoutMs = options.timeoutMs ?? 30_000;
   const dryRun = options.dryRun === true;
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
+  const pageBase = options.pageBase || ir.sourceUrl;
+  const publicDir = options.publicDir
+    ? path.resolve(options.publicDir)
+    : undefined;
+  const friendlyPublic =
+    options.friendlyPublic !== false && Boolean(publicDir);
 
   if (!dryRun) {
     fs.mkdirSync(outDir, { recursive: true });
   }
 
-  // Shallow clone IR + assets so callers can keep original unless rewrite desired
   const nextIr: PageIR = {
     ...ir,
     assets: (ir.assets ?? []).map((a) => ({ ...a })),
@@ -188,30 +196,64 @@ export async function materializeAssets(
 
   const assets = nextIr.assets;
   const written: MaterializeWritten[] = [];
+  const publicCopies: MaterializeAssetsResult["publicCopies"] = [];
+  const roleCounters: Partial<Record<AssetRole, number>> = {};
 
-  // Precompute filenames (stable even on failure)
-  const planned: Array<{
+  type Planned = {
     asset: PageIRAsset;
     index: number;
+    resolved: ReturnType<typeof resolveAssetFetchUrl>;
+    role: AssetRole;
     filename: string;
     localPath: string;
-  }> = assets.map((asset, index) => {
-    const filename = stableAssetFilename(asset.url, asset.kind, index);
-    const localPath = filename.replace(/\\/g, "/");
-    return { asset, index, filename, localPath };
+  };
+
+  const planned: Planned[] = assets.map((asset, index) => {
+    const resolved = resolveAssetFetchUrl(asset.url, pageBase);
+    const role = detectAssetRole(resolved.fetchUrl || asset.url, asset.kind, {
+      name: resolved.hintName,
+    });
+    const filename = stableAssetFilename(asset.url, asset.kind, index, {
+      pageBase,
+      preferredExt: resolved.hintExt || undefined,
+    });
+    return {
+      asset,
+      index,
+      resolved,
+      role,
+      filename,
+      localPath: filename.replace(/\\/g, "/"),
+    };
   });
 
-  async function processOne(item: (typeof planned)[number]): Promise<void> {
-    const { asset, filename, localPath } = item;
-    const dest = path.join(outDir, filename);
+  async function processOne(item: Planned): Promise<void> {
+    let { asset, filename, localPath, resolved, role } = item;
+    let dest = path.join(outDir, filename);
 
     if (dryRun) {
-      if (rewriteIr) asset.localPath = localPath;
-      written.push({ url: asset.url, localPath, ok: true });
+      if (rewriteIr) {
+        asset.localPath = localPath;
+        // Store resolved URL in notes-style field? keep original url; add resolved as optional
+        if (resolved.rewritten) {
+          (asset as PageIRAsset & { resolvedUrl?: string }).resolvedUrl =
+            resolved.fetchUrl;
+        }
+      }
+      written.push({
+        url: asset.url,
+        localPath,
+        ok: true,
+        fetchUrl: resolved.rewritten ? resolved.fetchUrl : undefined,
+        rewritten: resolved.rewritten || undefined,
+        role,
+      });
       return;
     }
 
     try {
+      let buf: Buffer | null = null;
+
       if (asset.url.startsWith("data:")) {
         const decoded = decodeDataUrl(asset.url);
         if (!decoded) {
@@ -220,6 +262,7 @@ export async function materializeAssets(
             localPath,
             ok: false,
             error: "unsupported or empty data: URL",
+            role,
           });
           if (rewriteIr) asset.localPath = localPath;
           return;
@@ -230,79 +273,153 @@ export async function materializeAssets(
             localPath,
             ok: false,
             error: `data: URL exceeds ${MAX_DATA_URL_BYTES} bytes; skipped`,
+            role,
           });
-          // Still assign path for deterministic IR even if not written
           if (rewriteIr) asset.localPath = localPath;
           return;
         }
-        fs.writeFileSync(dest, decoded.bytes);
-        if (rewriteIr) asset.localPath = localPath;
-        written.push({ url: asset.url.slice(0, 64) + (asset.url.length > 64 ? "..." : ""), localPath, ok: true });
-        return;
-      }
-
-      if (asset.url.startsWith("file:")) {
-        const filePath = fileUrlToPath(asset.url);
+        buf = decoded.bytes;
+      } else if (asset.url.startsWith("file:") || resolved.fetchUrl.startsWith("file:")) {
+        const filePath = fileUrlToPath(
+          resolved.fetchUrl.startsWith("file:")
+            ? resolved.fetchUrl
+            : asset.url,
+        );
         if (!fs.existsSync(filePath)) {
           throw new Error(`file not found: ${filePath}`);
         }
-        fs.copyFileSync(filePath, dest);
-        if (rewriteIr) asset.localPath = localPath;
-        written.push({ url: asset.url, localPath, ok: true });
-        return;
-      }
-
-      if (typeof fetchImpl !== "function") {
-        throw new Error("fetch is not available; pass fetchImpl or use Node 20+");
-      }
-
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const res = await fetchImpl(asset.url, {
-          signal: controller.signal,
-          redirect: "follow",
-          headers: {
-            // Some CDNs prefer a UA
-            "user-agent": "ctrlc-capture/0.1 (asset materialize)",
-            accept: "*/*",
-          },
-        });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status} ${res.statusText || ""}`.trim());
+        buf = fs.readFileSync(filePath);
+      } else {
+        if (typeof fetchImpl !== "function") {
+          throw new Error(
+            "fetch is not available; pass fetchImpl or use Node 20+",
+          );
         }
-        const buf = Buffer.from(await res.arrayBuffer());
-        fs.writeFileSync(dest, buf);
-        if (rewriteIr) asset.localPath = localPath;
-        written.push({ url: asset.url, localPath, ok: true });
-      } finally {
-        clearTimeout(timer);
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const res = await fetchImpl(resolved.fetchUrl, {
+            signal: controller.signal,
+            redirect: "follow",
+            headers: {
+              "user-agent": "ctrlc-capture/0.1 (asset materialize)",
+              accept: "*/*",
+            },
+          });
+          if (!res.ok) {
+            throw new Error(
+              `HTTP ${res.status} ${res.statusText || ""}`.trim(),
+            );
+          }
+          buf = Buffer.from(await res.arrayBuffer());
+
+          // Fix extension from Content-Type / magic when we only had .bin
+          const ctExt = extFromContentType(res.headers.get("content-type"));
+          const magicExt = extFromMagicBytes(buf);
+          const bestExt = magicExt || ctExt || resolved.hintExt;
+          if (bestExt && (localPath.endsWith(".bin") || !hasRealExt(localPath))) {
+            const renamed = replaceExt(filename, bestExt);
+            filename = renamed;
+            localPath = renamed.replace(/\\/g, "/");
+            dest = path.join(outDir, filename);
+          } else if (bestExt && path.extname(filename).toLowerCase() === ".bin") {
+            const renamed = replaceExt(filename, bestExt);
+            filename = renamed;
+            localPath = renamed.replace(/\\/g, "/");
+            dest = path.join(outDir, filename);
+          }
+        } finally {
+          clearTimeout(timer);
+        }
       }
+
+      if (!buf) throw new Error("empty body");
+
+      // Final magic-byte fix for data/file paths too
+      if (localPath.endsWith(".bin") || !hasRealExt(localPath)) {
+        const magicExt = extFromMagicBytes(buf);
+        if (magicExt) {
+          filename = replaceExt(filename, magicExt);
+          localPath = filename.replace(/\\/g, "/");
+          dest = path.join(outDir, filename);
+        }
+      }
+
+      fs.writeFileSync(dest, buf);
+      if (rewriteIr) {
+        asset.localPath = localPath;
+        if (resolved.rewritten) {
+          (asset as PageIRAsset & { resolvedUrl?: string }).resolvedUrl =
+            resolved.fetchUrl;
+        }
+      }
+
+      let publicPath: string | undefined;
+      if (friendlyPublic && publicDir) {
+        const idx = roleCounters[role] ?? 0;
+        roleCounters[role] = idx + 1;
+        const rel = friendlyPublicRelPath(
+          role,
+          path.extname(filename) || resolved.hintExt || ".png",
+          idx,
+        );
+        if (rel) {
+          const pubAbs = path.join(publicDir, rel);
+          fs.mkdirSync(path.dirname(pubAbs), { recursive: true });
+          fs.copyFileSync(dest, pubAbs);
+          publicPath = rel.replace(/\\/g, "/");
+          publicCopies.push({
+            role,
+            from: localPath,
+            to: publicPath,
+          });
+          (asset as PageIRAsset & { publicPath?: string }).publicPath =
+            publicPath;
+        }
+      }
+
+      written.push({
+        url: asset.url,
+        localPath,
+        ok: true,
+        fetchUrl: resolved.rewritten ? resolved.fetchUrl : undefined,
+        rewritten: resolved.rewritten || undefined,
+        publicPath,
+        role,
+      });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (rewriteIr) asset.localPath = localPath;
-      written.push({ url: asset.url, localPath, ok: false, error: msg });
+      written.push({
+        url: asset.url,
+        localPath,
+        ok: false,
+        error: msg,
+        fetchUrl: resolved.rewritten ? resolved.fetchUrl : undefined,
+        rewritten: resolved.rewritten || undefined,
+        role,
+      });
     }
   }
 
   await mapPool(planned, concurrency, processOne);
 
-  // Preserve input order in written results
   written.sort((a, b) => {
-    const ia = planned.findIndex((p) => p.localPath === a.localPath && p.asset.url === a.url);
-    const ib = planned.findIndex((p) => p.localPath === b.localPath && p.asset.url === b.url);
+    const ia = planned.findIndex(
+      (p) => p.asset.url === a.url,
+    );
+    const ib = planned.findIndex(
+      (p) => p.asset.url === b.url,
+    );
     return ia - ib;
   });
 
-  return { ir: nextIr, written, outDir };
+  return { ir: nextIr, written, outDir, publicCopies };
 }
 
 /**
  * Load IR from disk, materialize assets, write updated IR.
- *
- * Default out IR path: `<irDir>/ir.materialized.json` (or sibling of irPath).
- * Pass outIrPath to choose destination; use same path as irPath to overwrite
- * (a `.bak` backup is written first when overwriting).
  */
 export async function materializeAssetsFromFile(
   irPath: string,
@@ -318,18 +435,20 @@ export async function materializeAssetsFromFile(
   try {
     ir = JSON.parse(raw) as PageIR;
   } catch (e) {
-    throw new Error(`Invalid Page IR JSON: ${absIr}: ${e instanceof Error ? e.message : e}`);
+    throw new Error(
+      `Invalid Page IR JSON: ${absIr}: ${e instanceof Error ? e.message : e}`,
+    );
   }
 
-  if (!ir || typeof ir !== "object" || !Array.isArray(ir.assets)) {
-    // Tolerate missing assets array
-    if (!ir || typeof ir !== "object") {
-      throw new Error(`Invalid Page IR (not an object): ${absIr}`);
-    }
-    ir = { ...ir, assets: ir.assets ?? [] };
+  if (!ir || typeof ir !== "object") {
+    throw new Error(`Invalid Page IR (not an object): ${absIr}`);
   }
+  ir = { ...ir, assets: ir.assets ?? [] };
 
-  const result = await materializeAssets(ir, options);
+  const result = await materializeAssets(ir, {
+    ...options,
+    pageBase: options.pageBase || ir.sourceUrl,
+  });
 
   const outIrPath =
     options.outIrPath != null
@@ -349,7 +468,11 @@ function defaultMaterializedIrPath(irPath: string): string {
   return path.join(dir, `${base}.materialized.json`);
 }
 
-function writeIrFile(outIrPath: string, ir: PageIR, originalIrPath: string): void {
+function writeIrFile(
+  outIrPath: string,
+  ir: PageIR,
+  originalIrPath: string,
+): void {
   const abs = path.resolve(outIrPath);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
 
@@ -362,7 +485,11 @@ function writeIrFile(outIrPath: string, ir: PageIR, originalIrPath: string): voi
 }
 
 function shortHash(input: string): string {
-  return crypto.createHash("sha256").update(input, "utf8").digest("hex").slice(0, 8);
+  return crypto
+    .createHash("sha256")
+    .update(input, "utf8")
+    .digest("hex")
+    .slice(0, 8);
 }
 
 function sanitizeSegment(s: string): string {
@@ -375,7 +502,6 @@ function sanitizeSegment(s: string): string {
 }
 
 function sanitizeFilename(name: string): string {
-  // Strip path separators and control chars; keep one extension
   let n = name.replace(/[/\\?%*:|"<>]/g, "-").replace(/-+/g, "-");
   if (n.length > 180) {
     const extMatch = n.match(/(\.[a-z0-9]{1,8})$/i);
@@ -385,29 +511,10 @@ function sanitizeFilename(name: string): string {
   return n || "asset.bin";
 }
 
-function extFromPathname(pathname: string): string {
-  const base = pathname.split("/").pop() || "";
-  const m = base.match(/(\.[a-z0-9]{1,8})$/i);
-  if (!m) return "";
-  const ext = m[1].toLowerCase();
-  if (ext === ".jpeg") return ".jpg";
-  return KNOWN_EXTS.has(ext) ? ext : "";
-}
-
-function extFromContentHint(u: URL): string {
-  // format=woff2 style query
-  const format = u.searchParams.get("format") || u.searchParams.get("f");
-  if (format) {
-    const f = format.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const asExt = `.${f}`;
-    if (KNOWN_EXTS.has(asExt)) return asExt;
-  }
-  return "";
-}
-
 function defaultExtForKind(kind: PageIRAssetKind): string {
   switch (kind) {
     case "image":
+      // Prefer unknown images get sniffed later; use .bin only as last resort
       return ".bin";
     case "font":
       return ".woff2";
@@ -416,6 +523,17 @@ function defaultExtForKind(kind: PageIRAssetKind): string {
     default:
       return ".bin";
   }
+}
+
+function hasRealExt(filename: string): boolean {
+  const e = path.extname(filename).toLowerCase();
+  return Boolean(e && e !== ".bin" && e.length <= 6);
+}
+
+function replaceExt(filename: string, ext: string): string {
+  const e = normalizeExt(ext) || ext;
+  const base = filename.replace(/\.[a-z0-9]{1,8}$/i, "");
+  return sanitizeFilename(`${base}${e}`);
 }
 
 function dataUrlMime(url: string): string | null {
@@ -445,28 +563,36 @@ function decodeDataUrl(
 function fileUrlToPath(fileUrl: string): string {
   const u = new URL(fileUrl);
   let p = decodeURIComponent(u.pathname);
-  // Windows: /C:/path -> C:/path
   if (/^\/[a-zA-Z]:\//.test(p)) {
     p = p.slice(1);
   }
   return path.normalize(p);
 }
 
-/**
- * Run async work over items with a fixed concurrency pool.
- */
 async function mapPool<T>(
   items: T[],
   concurrency: number,
   fn: (item: T, index: number) => Promise<void>,
 ): Promise<void> {
   let next = 0;
-  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (true) {
-      const i = next++;
-      if (i >= items.length) break;
-      await fn(items[i]!, i);
-    }
-  });
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length || 1) },
+    async () => {
+      while (true) {
+        const i = next++;
+        if (i >= items.length) break;
+        await fn(items[i]!, i);
+      }
+    },
+  );
   await Promise.all(workers);
 }
+
+// Re-export URL helpers for consumers / tests
+export {
+  resolveAssetFetchUrl,
+  detectAssetRole,
+  friendlyPublicRelPath,
+  extFromContentType,
+  extFromMagicBytes,
+} from "./asset-urls";

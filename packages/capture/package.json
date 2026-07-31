@@ -24,9 +24,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/fix-esm-ext.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx scripts/test-ids.mjs && tsx scripts/test-ir.mjs && tsx scripts/test-materialize.mjs",
+    "test": "tsx scripts/test-ids.mjs && tsx scripts/test-ir.mjs && tsx scripts/test-materialize.mjs && tsx scripts/test-hygiene.mjs && tsx scripts/test-section-text.mjs",
     "test:ids": "tsx scripts/test-ids.mjs",
     "test:ir": "tsx scripts/test-ir.mjs",
+    "test:hygiene": "tsx scripts/test-hygiene.mjs",
+    "test:section-text": "tsx scripts/test-section-text.mjs",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -39,6 +41,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
+    "playwright": "^1.62.1",
     "typescript": "^5.8.2"
   },
   "engines": {

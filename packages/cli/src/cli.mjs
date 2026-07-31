@@ -30,6 +30,10 @@ import {
   PIPELINE_COMMANDS,
   EXPERIMENTAL_COMMANDS,
 } from "./help-commands.mjs";
+import {
+  getCommandModule,
+  resolveCommandFn,
+} from "./command-modules.mjs";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -185,6 +189,7 @@ Examples:
     --content-module src/content/home.ts --content-key hero --css src/styles/demo.css --selector .hero \\
     --interaction scroll --from-spec docs/research/components/hero.spec.md
   ctrlc qa --cwd .
+  ctrlc qa --cwd . --skip-build
   ctrlc capture https://example.com --out runs/demo
   ctrlc pipeline --ir runs/demo/ir.json --cwd .
   ctrlc pipeline --url https://example.com --cwd ./my-clone --dry-run
@@ -211,51 +216,32 @@ Notes:
 }
 
 /**
- * Map experimental command name -> expected module path under src/.
- * @param {string} command
- * @returns {string}
- */
-function experimentalModulePath(command) {
-  return path.join(__dirname, `${command}.mjs`);
-}
-
-/**
- * Dynamically run an experimental command module if present.
- * Modules should export cmdX or default async function(args, core?).
+ * Run a pipeline command from the static command-modules registry.
+ * Modules export cmdX (camelCase) or default/run.
  * @param {string} command
  * @param {import("./args.mjs").ParsedArgs} args
  * @param {Awaited<ReturnType<typeof loadCore>> | null} core
  * @returns {Promise<number>}
  */
-async function runExperimentalCommand(command, args, core) {
-  const modPath = experimentalModulePath(command);
-  if (!fs.existsSync(modPath)) {
-    // TODO: wire when sibling agents add packages/cli/src/<command>.mjs
+async function runPipelineCommand(command, args, core) {
+  const mod = getCommandModule(command);
+  if (!mod) {
     console.error(
-      `Command "${command}" is experimental and not installed yet.\n` +
-        `Expected module: ${modPath}\n` +
-        `See help for planned capture pipeline extras.`,
+      `Command "${command}" is not installed in this CLI build.\n` +
+        `See help for capture pipeline commands.`,
     );
     return 1;
   }
-  const mod = await import(pathToFileURL(modPath).href);
-  const camel =
-    "cmd" +
-    command
-      .split("-")
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-      .join("");
-  const fn = mod[camel] || mod.default || mod.run;
+  const fn = resolveCommandFn(mod, command);
   if (typeof fn !== "function") {
     console.error(
-      `Experimental module ${command}.mjs has no ${camel}/default/run export`,
+      `Pipeline module ${command} has no cmd export (cmdX/default/run)`,
     );
     return 1;
   }
   const result = await fn(args, core);
   return typeof result === "number" ? result : 0;
 }
-
 /**
  * @param {string} outPath
  * @param {string | Uint8Array | Buffer} data
@@ -1090,21 +1076,20 @@ export async function run(argv) {
       return await cmdDoctor(args);
     }
 
-    // Capture-pipeline commands (dynamic modules under packages/cli/src/)
+    // Capture-pipeline commands (static registry in command-modules.mjs)
     if (
       PIPELINE_COMMANDS.includes(args.command) ||
       EXPERIMENTAL_COMMANDS.includes(args.command)
     ) {
-      const modPath = experimentalModulePath(args.command);
       let core = null;
-      if (fs.existsSync(modPath)) {
+      if (getCommandModule(args.command)) {
         try {
           core = await loadCore();
         } catch {
           // some pipeline cmds may work without core (e.g. materialize-assets)
         }
       }
-      return await runExperimentalCommand(args.command, args, core);
+      return await runPipelineCommand(args.command, args, core);
     }
 
     const core = await loadCore();
@@ -1138,11 +1123,7 @@ export async function run(argv) {
       case "qa":
         await cmdQa(args, core);
         return 0;
-      // TODO: static cases once experimental modules land permanently
-      // case "materialize-assets":
-      // case "tokens-from-ir":
-      // case "register-from-ir":
-      // case "baseline":
+      // Pipeline commands: getCommandModule / runPipelineCommand above.
       default:
         console.error(`Unknown command: ${args.command}`);
         printHelp();
@@ -1156,9 +1137,14 @@ export async function run(argv) {
 }
 
 // Allow direct: node src/cli.mjs list
-const isDirect =
-  process.argv[1] &&
-  path.resolve(process.argv[1]).includes(`${path.sep}cli${path.sep}src${path.sep}cli.mjs`);
+const isDirect = (() => {
+  if (!process.argv[1]) return false;
+  const resolved = path.resolve(process.argv[1]).replace(/\\/g, "/");
+  return (
+    resolved.endsWith("/cli/src/cli.mjs") ||
+    resolved.endsWith("/cli/dist/cli.mjs")
+  );
+})();
 
 if (isDirect) {
   run(process.argv.slice(2)).then((code) => process.exit(code));

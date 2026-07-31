@@ -105,6 +105,8 @@ export {
   writeTopologyFromIR,
   parsePageIR,
   loadPageIR,
+  contentSlotsFromIrText,
+  formatStructuredTextBlock,
 } from "./ir-to-specs";
 export type {
   IrInteractionModel,
@@ -121,6 +123,19 @@ export type {
   WriteTopologyFromIROptions,
 } from "./ir-to-specs";
 
+// Page IR → React scaffold (components + home content + page.tsx)
+export {
+  planScaffoldFromIR,
+  writeScaffoldFromIR,
+  scaffoldFromIrFile,
+} from "./scaffold-from-ir";
+export type {
+  ScaffoldSectionPlan,
+  ScaffoldFromIrOptions,
+  ScaffoldWrittenFile,
+  ScaffoldFromIrResult,
+} from "./scaffold-from-ir";
+
 // File registry (.ctrlc/registry.json)
 export {
   mergeSectionRegistry,
@@ -129,12 +144,14 @@ export {
 } from "./registry";
 export type { SectionPackRegistryFile } from "./registry";
 
-// B5 - tokens from Page IR
+// B5 / B5b - curated tokens from Page IR (semantic --ts-* roles)
 export {
   extractTokensFromIR,
   writeTokensFromIR,
 } from "./tokens-from-ir";
 export type {
+  TokenSemanticRole,
+  TokensFromIROptions,
   TokensFromIRResult,
   WriteTokensFromIROptions,
   WriteTokensFromIRResult,

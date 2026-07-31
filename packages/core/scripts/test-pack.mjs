@@ -1380,10 +1380,42 @@ export function PromoPanel() {
     );
     assertIncludes(tokens.css, ":root", "css has :root");
     assertIncludes(tokens.css, "--color-bg", "css has --color-bg");
+    // B5b semantic curation (--ts-* roles)
+    assert(tokens.semantic && typeof tokens.semantic === "object", "semantic roles object");
+    assert(!!tokens.semantic.bg, "semantic.bg set");
+    assert(!!tokens.semantic.accent, "semantic.accent set");
+    assert(!!tokens.semantic.ink, "semantic.ink set");
+    assertIncludes(tokens.css, "--ts-bg", "css has --ts-bg");
+    assertIncludes(tokens.css, "--ts-accent", "css has --ts-accent");
+    assertIncludes(tokens.css, "--ts-ink", "css has --ts-ink");
+    assertIncludes(tokens.css, "--ts-font", "css has --ts-font");
+    assert(
+      tokens.cssVariables["--ts-bg"] != null,
+      "cssVariables includes --ts-bg",
+    );
+    assert(
+      tokens.cssVariables["--color-accent"] === "#3b82f6",
+      "preserves IR --color-accent",
+    );
+    // IR --color-accent should seed accent role when name matches
+    assert(
+      /#3b82f6/i.test(tokens.semantic.accent) ||
+        /#3b82f6/i.test(tokens.cssVariables["--ts-accent"] || ""),
+      "accent role uses brand blue from IR",
+    );
+    assert(
+      tokens.theme === "dark" || tokens.theme === "light" || tokens.theme === "unknown",
+      "theme detected",
+    );
     assertIncludes(
       tokens.designTokensMarkdown,
       "Design tokens",
       "markdown title",
+    );
+    assertIncludes(
+      tokens.designTokensMarkdown,
+      "Semantic roles",
+      "markdown semantic section",
     );
     assertIncludes(
       tokens.designTokensMarkdown,
@@ -1398,6 +1430,23 @@ export function PromoPanel() {
       1,
       "dedupes #0a0a0a",
     );
+
+    // Top-N cap
+    const manyColors = {
+      tokens: {
+        colors: Array.from({ length: 30 }, (_, i) => `#${String(i).padStart(6, "0")}`),
+        fonts: ["Inter", "Roboto", "Georgia", "Menlo", "Arial", "Courier New"],
+      },
+    };
+    const capped = extractTokensFromIR(manyColors, { maxColors: 5, maxFonts: 3 });
+    assertEq(capped.colors.length, 5, "maxColors caps palette");
+    assertEq(capped.fonts.length, 3, "maxFonts caps fonts");
+    assertIncludes(capped.css, "--ts-bg", "capped still has semantic --ts-bg");
+
+    // Custom prefix
+    const pref = extractTokensFromIR(fixtureIR, { prefix: "brand" });
+    assertIncludes(pref.css, "--brand-bg", "custom prefix --brand-bg");
+    assert(pref.cssVariables["--brand-accent"] != null, "custom prefix accent");
 
     const reg = registryFromIR(fixtureIR);
     assertEq(reg.sections.length, 4, "registryFromIR 4 sections");

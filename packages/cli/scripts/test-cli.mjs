@@ -25,6 +25,30 @@ const MONO_ROOT = path.resolve(CLI_ROOT, "../..");
 const BIN = path.join(CLI_ROOT, "bin/ctrlc.mjs");
 const DEMO = path.join(MONO_ROOT, "examples/next-demo");
 const CORE_DIST = path.join(MONO_ROOT, "packages/core/dist/index.js");
+const DIST_CLI = path.join(CLI_ROOT, "dist/cli.mjs");
+const BUILD_SCRIPT = path.join(CLI_ROOT, "scripts/build-cli.mjs");
+
+/**
+ * Prefer dist/cli.mjs for bin; build if missing so tests exercise the bundle.
+ */
+function ensureCliBundle() {
+  if (fs.existsSync(DIST_CLI)) return { built: false, path: DIST_CLI };
+  console.log("  building CLI dist (missing) ...");
+  const r = spawnSync(process.execPath, [BUILD_SCRIPT], {
+    encoding: "utf8",
+    cwd: CLI_ROOT,
+    env: process.env,
+  });
+  if (r.status !== 0) {
+    console.error(r.stdout || "");
+    console.error(r.stderr || "");
+    throw new Error(`build-cli failed with status ${r.status}`);
+  }
+  if (!fs.existsSync(DIST_CLI)) {
+    throw new Error("build-cli finished but dist/cli.mjs is still missing");
+  }
+  return { built: true, path: DIST_CLI };
+}
 
 async function importCore() {
   try {
@@ -720,10 +744,125 @@ function testCliPlanParallel() {
   }
 }
 
+function testCliQaSkipBuild() {
+  console.log("\ncli qa --skip-build (next-demo + help)");
+  const help = runCli(["--help"]);
+  assert(help.status === 0, "help exit 0 (qa skip-build context)");
+  assert(
+    help.stdout.includes("skip-build") || help.stdout.includes("--skip-build"),
+    "help mentions --skip-build",
+  );
+
+  if (!fs.existsSync(DEMO)) {
+    console.log("  skip  next-demo missing");
+    return;
+  }
+
+  const r = runCli([
+    "qa",
+    "--cwd",
+    DEMO,
+    "--skip-build",
+    "--json",
+  ]);
+  assert(
+    r.status === 0,
+    `qa --skip-build exit 0 (status=${r.status}; stderr: ${r.stderr.slice(0, 300)})`,
+  );
+  let data;
+  try {
+    data = JSON.parse(r.stdout);
+  } catch (e) {
+    assert(false, `qa --skip-build json: ${e.message}\n${r.stdout.slice(0, 400)}`);
+    return;
+  }
+  assert(data.ok === true, "qa --skip-build json ok");
+  assert(Array.isArray(data.steps), "qa steps array");
+  const buildStep = (data.steps || []).find((s) => s.step === "npm-run-build");
+  assert(!!buildStep, "qa has npm-run-build step");
+  assert(buildStep.ok === true, "npm-run-build step ok when skipped");
+  assert(
+    /skipped \(--skip-build\)/.test(String(buildStep.detail || "")),
+    `npm-run-build detail is skipped (--skip-build) (got ${buildStep.detail})`,
+  );
+
+  // --no-build alias messaging
+  const alias = runCli([
+    "qa",
+    "--cwd",
+    DEMO,
+    "--no-build",
+    "--json",
+  ]);
+  assert(alias.status === 0, "qa --no-build exit 0");
+  let aliasData;
+  try {
+    aliasData = JSON.parse(alias.stdout);
+  } catch (e) {
+    assert(false, `qa --no-build json: ${e.message}`);
+    return;
+  }
+  const aliasBuild = (aliasData.steps || []).find((s) => s.step === "npm-run-build");
+  assert(
+    aliasBuild && /skipped \(--no-build\)/.test(String(aliasBuild.detail || "")),
+    `npm-run-build detail is skipped (--no-build) (got ${aliasBuild?.detail})`,
+  );
+
+  // both flags: prefer --skip-build label
+  const both = runCli([
+    "qa",
+    "--cwd",
+    DEMO,
+    "--skip-build",
+    "--no-build",
+    "--json",
+  ]);
+  assert(both.status === 0, "qa --skip-build --no-build exit 0");
+  let bothData;
+  try {
+    bothData = JSON.parse(both.stdout);
+  } catch (e) {
+    assert(false, `qa both flags json: ${e.message}`);
+    return;
+  }
+  const bothBuild = (bothData.steps || []).find((s) => s.step === "npm-run-build");
+  assert(
+    bothBuild && /skipped \(--skip-build\)/.test(String(bothBuild.detail || "")),
+    `both flags prefer skipped (--skip-build) (got ${bothBuild?.detail})`,
+  );
+}
+
+
+
+function testBinBundleAndNoTsx() {
+  console.log("\ncli bin bundle + no --import tsx");
+  ensureCliBundle();
+  assert(fs.existsSync(DIST_CLI), "dist/cli.mjs exists after ensure/build");
+
+  const binSrc = fs.readFileSync(BIN, "utf8");
+  assert(
+    !binSrc.includes("spawnSync") && !binSrc.includes("hasTsxImport"),
+    "bin/ctrlc.mjs does not re-exec via spawnSync + tsx",
+  );
+  assert(
+    binSrc.includes("dist/cli.mjs") && binSrc.includes("src/cli.mjs"),
+    "bin prefers dist then src",
+  );
+
+  // Help via bin with dist present (no tsx in parent either)
+  const help = runCli(["--help"]);
+  assert(help.status === 0, "bin --help exit 0 with dist present");
+  assert(help.stdout.includes("CtrlC"), "bin --help mentions CtrlC");
+  assert(
+    !(process.execArgv || []).some((a) => String(a).includes("tsx")),
+    "test process execArgv has no tsx (bin does not require it)",
+  );
+}
 async function main() {
   console.log("test-cli: @ctrlc/cli smoke tests");
   console.log(`  bin: ${BIN}`);
 
+  testBinBundleAndNoTsx();
   testScanHelpers();
   await testScanApi();
   await testCoreList();
@@ -743,6 +882,7 @@ async function main() {
   testCliInitClone();
   testCliPlanParallel();
   testCliPipelineDryRun();
+  testCliQaSkipBuild();
 
   console.log("");
   if (failed) {

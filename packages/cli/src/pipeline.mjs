@@ -7,21 +7,18 @@
  *   ctrlc pipeline --ir ir.json --cwd . --dry-run
  *   ctrlc pipeline --ir ir.json --cwd . --json
  *
- * Imports sibling cmd modules (no shell-out). Skips optional steps if module/API
- * missing; exits non-zero if a required step fails.
+ * Uses static command-modules registry (bundles cleanly; no dynamic sibling paths).
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL, fileURLToPath } from "node:url";
 import {
   flagString,
   flagBool,
   resolveCwd,
   resolveInputPath,
 } from "./args.mjs";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { getCommandModule, resolveCommandFn } from "./command-modules.mjs";
 
 /**
  * @typedef {{
@@ -48,37 +45,12 @@ function synthArgs(command, flags, positionals = []) {
 }
 
 /**
+ * Load a command module from the static registry (bundler-safe).
  * @param {string} modBase  e.g. "capture" or "plan-parallel"
- * @returns {Promise<Record<string, unknown> | null>}
+ * @returns {Record<string, unknown> | null}
  */
-async function tryLoadSibling(modBase) {
-  const modPath = path.join(__dirname, `${modBase}.mjs`);
-  if (!fs.existsSync(modPath)) return null;
-  try {
-    return await import(pathToFileURL(modPath).href);
-  } catch (e) {
-    console.error(
-      `pipeline: failed to load ${modBase}.mjs: ${String(/** @type {Error} */ (e)?.message ?? e)}`,
-    );
-    return null;
-  }
-}
-
-/**
- * Resolve cmd export: cmdFooBar from "foo-bar", or default/run.
- * @param {Record<string, unknown>} mod
- * @param {string} command
- * @returns {((args: import("./args.mjs").ParsedArgs, core?: unknown) => Promise<number|void>) | null}
- */
-function resolveCmdFn(mod, command) {
-  const camel =
-    "cmd" +
-    command
-      .split("-")
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-      .join("");
-  const fn = mod[camel] || mod.default || mod.run;
-  return typeof fn === "function" ? /** @type {any} */ (fn) : null;
+function tryLoadSibling(modBase) {
+  return getCommandModule(modBase);
 }
 
 /**
@@ -138,8 +110,9 @@ Steps (skip gracefully if module missing; required steps fail the pipeline):
   3. tokens-from-ir      -> docs/research
   4. register-from-ir    -> .ctrlc/registry.json
   5. specs-from-ir       -> docs/research/components
-  6. baseline            (optional; only if screenshot next to IR)
-  7. plan-parallel       (optional; only if module exists)
+  6. scaffold-from-ir    -> React stubs + home.ts + page.tsx
+  7. baseline            (optional; only if screenshot next to IR)
+  8. plan-parallel       (optional; only if module exists)
 
 Options:
   --ir <file>              Page IR JSON (required unless --url)
@@ -150,6 +123,7 @@ Options:
   --skip-tokens            Skip tokens-from-ir
   --skip-register          Skip register-from-ir
   --skip-specs             Skip specs-from-ir
+  --skip-scaffold          Skip React scaffold-from-ir
   --skip-baseline          Skip baseline even if screenshot exists
   --skip-plan              Skip plan-parallel even if present
   --dry-run                Print planned steps only (no work, no Playwright)
@@ -186,6 +160,7 @@ export async function cmdPipeline(args, core) {
   const skipTokens = flagBool(args.flags, "skip-tokens");
   const skipRegister = flagBool(args.flags, "skip-register");
   const skipSpecs = flagBool(args.flags, "skip-specs");
+  const skipScaffold = flagBool(args.flags, "skip-scaffold");
   const skipBaseline = flagBool(args.flags, "skip-baseline");
   const skipPlan = flagBool(args.flags, "skip-plan");
 
@@ -246,6 +221,14 @@ export async function cmdPipeline(args, core) {
     required: true,
     skip: skipSpecs,
     reason: skipSpecs ? "flag --skip-specs" : undefined,
+  });
+  plan.push({
+    name: "scaffold-from-ir",
+    required: false,
+    skip: skipScaffold,
+    reason: skipScaffold
+      ? "flag --skip-scaffold"
+      : "React stubs + home.ts + page.tsx",
   });
   plan.push({
     name: "baseline",
@@ -311,8 +294,8 @@ export async function cmdPipeline(args, core) {
 
   // --- 1. capture (url only) ---
   if (url) {
-    const mod = await tryLoadSibling("capture");
-    const fn = mod ? resolveCmdFn(mod, "capture") : null;
+    const mod = tryLoadSibling("capture");
+    const fn = mod ? resolveCommandFn(mod, "capture") : null;
     if (!fn) {
       steps.push({
         name: "capture",
@@ -401,8 +384,8 @@ export async function cmdPipeline(args, core) {
 
   // --- 2. materialize-assets ---
   if (!skipMaterialize && !failed) {
-    const mod = await tryLoadSibling("materialize-assets");
-    const fn = mod ? resolveCmdFn(mod, "materialize-assets") : null;
+    const mod = tryLoadSibling("materialize-assets");
+    const fn = mod ? resolveCommandFn(mod, "materialize-assets") : null;
     if (!fn) {
       steps.push({
         name: "materialize-assets",
@@ -417,12 +400,14 @@ export async function cmdPipeline(args, core) {
       if (!asJson) console.log("--- materialize-assets ---");
       try {
         const outIr = path.join(cwd, ".ctrlc", "ir.materialized.json");
+        const publicDir = path.join(cwd, "public");
         const code = asCode(
           await fn(
             synthArgs("materialize-assets", {
               ir: irAbs,
               out: assetsOut,
               "out-ir": outIr,
+              "public-dir": publicDir,
             }),
           ),
         );
@@ -469,8 +454,8 @@ export async function cmdPipeline(args, core) {
 
   // --- 3. tokens-from-ir ---
   if (!skipTokens && !failed) {
-    const mod = await tryLoadSibling("tokens-from-ir");
-    const fn = mod ? resolveCmdFn(mod, "tokens-from-ir") : null;
+    const mod = tryLoadSibling("tokens-from-ir");
+    const fn = mod ? resolveCommandFn(mod, "tokens-from-ir") : null;
     if (!fn) {
       steps.push({
         name: "tokens-from-ir",
@@ -529,8 +514,8 @@ export async function cmdPipeline(args, core) {
 
   // --- 4. register-from-ir ---
   if (!skipRegister && !failed) {
-    const mod = await tryLoadSibling("register-from-ir");
-    const fn = mod ? resolveCmdFn(mod, "register-from-ir") : null;
+    const mod = tryLoadSibling("register-from-ir");
+    const fn = mod ? resolveCommandFn(mod, "register-from-ir") : null;
     if (!fn) {
       steps.push({
         name: "register-from-ir",
@@ -588,8 +573,8 @@ export async function cmdPipeline(args, core) {
 
   // --- 5. specs-from-ir ---
   if (!skipSpecs && !failed) {
-    const mod = await tryLoadSibling("specs-from-ir");
-    const fn = mod ? resolveCmdFn(mod, "specs-from-ir") : null;
+    const mod = tryLoadSibling("specs-from-ir");
+    const fn = mod ? resolveCommandFn(mod, "specs-from-ir") : null;
     if (!fn) {
       steps.push({
         name: "specs-from-ir",
@@ -645,7 +630,72 @@ export async function cmdPipeline(args, core) {
     });
   }
 
-  // --- 6. baseline (optional; do not fail pipeline) ---
+  // --- 6. scaffold-from-ir (React stubs; non-fatal if missing) ---
+  if (!skipScaffold && !failed) {
+    const mod = tryLoadSibling("scaffold-from-ir");
+    const fn = mod ? resolveCommandFn(mod, "scaffold-from-ir") : null;
+    if (!fn) {
+      steps.push({
+        name: "scaffold-from-ir",
+        status: "skipped",
+        detail: "module missing",
+        required: false,
+      });
+      if (!asJson) {
+        console.log("pipeline: skip scaffold-from-ir (module missing)");
+      }
+    } else {
+      if (!asJson) console.log("--- scaffold-from-ir ---");
+      try {
+        const code = asCode(
+          await fn(
+            synthArgs("scaffold-from-ir", {
+              ir: irAbs,
+              cwd,
+            }),
+            core,
+          ),
+        );
+        if (code !== 0) {
+          steps.push({
+            name: "scaffold-from-ir",
+            status: "failed",
+            detail: `exit ${code} (non-fatal)`,
+            required: false,
+          });
+          if (!asJson) {
+            console.log("pipeline: scaffold-from-ir failed (continuing)");
+          }
+        } else {
+          steps.push({
+            name: "scaffold-from-ir",
+            status: "ok",
+            detail: path.join(cwd, "src", "components", "sections"),
+            required: false,
+          });
+        }
+      } catch (e) {
+        steps.push({
+          name: "scaffold-from-ir",
+          status: "failed",
+          detail: `${String(/** @type {Error} */ (e)?.message ?? e)} (non-fatal)`,
+          required: false,
+        });
+        if (!asJson) {
+          console.log("pipeline: scaffold-from-ir error (continuing)");
+        }
+      }
+    }
+  } else if (skipScaffold) {
+    steps.push({
+      name: "scaffold-from-ir",
+      status: "skipped",
+      detail: "flag --skip-scaffold",
+      required: false,
+    });
+  }
+
+  // --- 7. baseline (optional; do not fail pipeline) ---
   if (!skipBaseline && !failed) {
     const irDir = path.dirname(irAbs);
     const shot = findScreenshotInDir(irDir);
@@ -660,8 +710,8 @@ export async function cmdPipeline(args, core) {
         console.log("pipeline: skip baseline (no screenshot next to IR)");
       }
     } else {
-      const mod = await tryLoadSibling("baseline");
-      const fn = mod ? resolveCmdFn(mod, "baseline") : null;
+      const mod = tryLoadSibling("baseline");
+      const fn = mod ? resolveCommandFn(mod, "baseline") : null;
       if (!fn) {
         steps.push({
           name: "baseline",
@@ -720,10 +770,10 @@ export async function cmdPipeline(args, core) {
     });
   }
 
-  // --- 7. plan-parallel (optional; only if module exists) ---
+  // --- 8. plan-parallel (optional; only if module exists) ---
   if (!skipPlan && !failed) {
-    const mod = await tryLoadSibling("plan-parallel");
-    const fn = mod ? resolveCmdFn(mod, "plan-parallel") : null;
+    const mod = tryLoadSibling("plan-parallel");
+    const fn = mod ? resolveCommandFn(mod, "plan-parallel") : null;
     if (!fn) {
       steps.push({
         name: "plan-parallel",

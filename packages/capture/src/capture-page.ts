@@ -22,6 +22,13 @@ import {
   type PageIRSection,
 } from "./ir";
 import { uniqueSectionIds, normalizeSectionId } from "./section-ids";
+import { hygienizePageIR } from "./hygienize-sections";
+import {
+  ensureIrTextFields,
+  normalizeSectionText,
+  synthesizeTextSample,
+  type PageIRSectionText,
+} from "./section-text";
 import { writeIr } from "./write-ir";
 import { materializeAssets } from "./materialize-assets";
 
@@ -102,6 +109,8 @@ interface RawSectionCandidate {
   label: string;
   selector: string;
   textSample: string;
+  /** Structured text (headings, CTAs, lists) when extract succeeds */
+  text?: PageIRSectionText;
   tagName: string;
   boundingBox: { x: number; y: number; width: number; height: number } | null;
   styles: Record<string, string>;
@@ -205,42 +214,58 @@ export async function capturePage(
     const labels = extracted.sections.map((s) => s.label || s.tagName || "section");
     const ids = uniqueSectionIds(labels);
 
-    const sections: PageIRSection[] = extracted.sections.map((raw, i) => ({
-      id: ids[i] ?? (normalizeSectionId(raw.label) || `section-${i + 1}`),
-      label: raw.label || humanizeId(ids[i] ?? `section-${i + 1}`),
-      interactionModel: raw.interactionModel ?? "static",
-      selector: raw.selector || undefined,
-      boundingBox: raw.boundingBox ?? undefined,
-      textSample: raw.textSample || undefined,
-      styles: Object.keys(raw.styles || {}).length ? raw.styles : undefined,
-      childrenHints:
-        raw.childrenHints && raw.childrenHints.length
-          ? raw.childrenHints
-          : undefined,
-    }));
-
-    let ir: PageIR = {
-      schemaVersion: PAGE_IR_SCHEMA_VERSION,
-      sourceUrl: url,
-      capturedAt: new Date().toISOString(),
-      viewport,
-      title: extracted.title || undefined,
-      sections,
-      tokens: {
-        colors: extracted.colors,
-        fonts: extracted.fonts,
-        cssVariables:
-          Object.keys(extracted.cssVariables || {}).length > 0
-            ? extracted.cssVariables
+    const sections: PageIRSection[] = extracted.sections.map((raw, i) => {
+      const text = normalizeSectionText(raw.text);
+      const textSample =
+        (raw.textSample && String(raw.textSample).trim()) ||
+        synthesizeTextSample(text, 200) ||
+        undefined;
+      return {
+        id: ids[i] ?? (normalizeSectionId(raw.label) || `section-${i + 1}`),
+        label: raw.label || humanizeId(ids[i] ?? `section-${i + 1}`),
+        interactionModel: raw.interactionModel ?? "static",
+        selector: raw.selector || undefined,
+        boundingBox: raw.boundingBox ?? undefined,
+        ...(text ? { text } : {}),
+        textSample,
+        styles: Object.keys(raw.styles || {}).length ? raw.styles : undefined,
+        childrenHints:
+          raw.childrenHints && raw.childrenHints.length
+            ? raw.childrenHints
             : undefined,
-      },
-      assets: extracted.assets,
-      notes: [
-        "ctrlc capture (scope=page). Recon for React section rebuild - not an HTML dump.",
-        "Screenshot: screenshot.png (full page; also screenshots/full.png)",
-        ...extracted.notes,
-      ],
-    };
+      };
+    });
+
+    // Hygiene: drop noise, dedupe, stable short ids (hero/pricing/faq) + full labels
+    // Then re-normalize structured text fields after object clones.
+    let ir: PageIR = ensureIrTextFields(
+      hygienizePageIR(
+        {
+          schemaVersion: PAGE_IR_SCHEMA_VERSION,
+          sourceUrl: url,
+          capturedAt: new Date().toISOString(),
+          viewport,
+          title: extracted.title || undefined,
+          sections,
+          tokens: {
+            colors: extracted.colors,
+            fonts: extracted.fonts,
+            cssVariables:
+              Object.keys(extracted.cssVariables || {}).length > 0
+                ? extracted.cssVariables
+                : undefined,
+          },
+          assets: extracted.assets,
+          notes: [
+            "ctrlc capture (scope=page). Recon for React section rebuild - not an HTML dump.",
+            "Screenshot: screenshot.png (full page; also screenshots/full.png)",
+            "Section text includes structured headings/CTAs/listItems when available (not only textSample).",
+            ...extracted.notes,
+          ],
+        },
+        {},
+      ),
+    );
 
     let materializeInfo: CapturePageResult["materialize"];
 
@@ -385,6 +410,28 @@ function extractInPage(): BrowserExtract {
     } catch {
       return;
     }
+    // Prefer unwrapping Next.js image optimizer at capture time when easy
+    try {
+      const u = new URL(abs);
+      if (u.pathname.includes("/_next/image")) {
+        const nested = u.searchParams.get("url");
+        if (nested) {
+          let decoded = nested;
+          try {
+            decoded = decodeURIComponent(nested);
+          } catch {
+            /* keep */
+          }
+          try {
+            abs = new URL(decoded, u.origin).href;
+          } catch {
+            /* keep optimizer url; materialize will retry */
+          }
+        }
+      }
+    } catch {
+      /* keep abs */
+    }
     if (seenUrl.has(abs)) return;
     seenUrl.add(abs);
     assets.push({ url: abs, kind });
@@ -518,6 +565,17 @@ function extractInPage(): BrowserExtract {
       ) {
         continue;
       }
+      // Skip empty/tiny generic nodes early (IR hygiene also runs post-extract)
+      const tag = child.tagName.toLowerCase();
+      const text = (child.textContent || "").trim();
+      const rect = child.getBoundingClientRect();
+      if (
+        (tag === "div" || tag === "span") &&
+        text.length < 16 &&
+        rect.height < 48
+      ) {
+        continue;
+      }
       addCand(child);
     }
   }
@@ -525,7 +583,8 @@ function extractInPage(): BrowserExtract {
   // Cap section count for IR readability
   const limited = candidates.slice(0, 40);
 
-  const sections: RawSectionCandidate[] = limited.map((c) => {
+  // Note: extract runs in the browser via page.evaluate; keep typing loose here.
+  const sections = limited.map((c): RawSectionCandidate => {
     const el = c.el;
     const rect = el.getBoundingClientRect();
     const scrollX = window.scrollX || window.pageXOffset || 0;
@@ -547,10 +606,141 @@ function extractInPage(): BrowserExtract {
       styles = {};
     }
 
-    const text = (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 160);
     const childTags = Array.from(el.children)
       .slice(0, 12)
       .map((ch) => ch.tagName.toLowerCase());
+
+    // Structured text model (headings / CTAs / lists) — not one giant blob only
+    function cleanText(raw: string, max = 240) {
+      return String(raw || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, max);
+    }
+    function uniqLines(items: string[], maxItems: number) {
+      const seen = new Set();
+      const out = [];
+      for (const it of items) {
+        const t = cleanText(it);
+        if (!t) continue;
+        const k = t.toLowerCase();
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(t);
+        if (out.length >= maxItems) break;
+      }
+      return out;
+    }
+
+    const headings = uniqLines(
+      Array.from(el.querySelectorAll("h1,h2,h3,h4,h5,h6")).map(
+        (n) => n.textContent || "",
+      ),
+      12,
+    );
+    const paragraphs = uniqLines(
+      Array.from(el.querySelectorAll("p")).map((n) => n.textContent || ""),
+      16,
+    );
+    const listItems = uniqLines(
+      Array.from(el.querySelectorAll("li")).map((n) => n.textContent || ""),
+      40,
+    );
+
+    const ctas: Array<{ label: string; href?: string; role?: string }> = [];
+    const ctaSeen = new Set<string>();
+    const ctaNodes = Array.from(
+      el.querySelectorAll(
+        "a[href], button, [role='button'], input[type='submit'], input[type='button']",
+      ),
+    ).slice(0, 24);
+    for (let ci = 0; ci < ctaNodes.length; ci++) {
+      const node = ctaNodes[ci] as Element;
+      let label = cleanText(
+        node.getAttribute("aria-label") ||
+          node.getAttribute("value") ||
+          node.textContent ||
+          "",
+        120,
+      );
+      if (!label || label.length < 1) continue;
+      const href =
+        node.tagName === "A"
+          ? cleanText(node.getAttribute("href") || "", 500)
+          : "";
+      const key = label.toLowerCase() + "|" + href;
+      if (ctaSeen.has(key)) continue;
+      ctaSeen.add(key);
+      let role = "link";
+      if (node.tagName === "BUTTON" || node.getAttribute("role") === "button") {
+        role = "button";
+      }
+      const cls = typeof (node as HTMLElement).className === "string"
+        ? (node as HTMLElement).className
+        : "";
+      if (/primary|btn-primary|cta-primary/i.test(cls)) role = "primary";
+      else if (/secondary|btn-secondary|ghost|outline/i.test(cls)) {
+        role = "secondary";
+      } else if (ci === 0 && role === "button") role = "primary";
+      else if (ci === 1 && (role === "button" || role === "link")) {
+        role = "secondary";
+      }
+      const cta: { label: string; href?: string; role?: string } = {
+        label,
+        role,
+      };
+      if (href) cta.href = href;
+      ctas.push(cta);
+      if (ctas.length >= 16) break;
+    }
+
+    const labels = uniqLines(
+      [
+        ...Array.from(el.querySelectorAll("figcaption, dt, legend")).map(
+          (n) => n.textContent || "",
+        ),
+        ...Array.from(el.querySelectorAll("[data-label], .eyebrow, .kicker, .badge"))
+          .slice(0, 8)
+          .map((n) => n.textContent || ""),
+      ],
+      20,
+    );
+
+    // Eyebrow: small text before first heading
+    let eyebrow = "";
+    if (headings.length) {
+      const h = el.querySelector("h1,h2,h3");
+      if (h) {
+        let prev = h.previousElementSibling;
+        let hops = 0;
+        while (prev && hops < 3) {
+          const t = cleanText(prev.textContent || "", 120);
+          if (t && t.length < 80 && t !== headings[0]) {
+            eyebrow = t;
+            break;
+          }
+          prev = prev.previousElementSibling;
+          hops++;
+        }
+      }
+    }
+
+    const textModel: PageIRSectionText = {
+      headings,
+      paragraphs,
+      listItems,
+      ctas,
+      ...(eyebrow ? { eyebrow } : {}),
+      ...(labels.length ? { labels } : {}),
+    };
+
+    const sampleParts: string[] = [];
+    if (eyebrow) sampleParts.push(eyebrow);
+    for (const h of headings.slice(0, 2)) sampleParts.push(h);
+    for (const p of paragraphs.slice(0, 2)) sampleParts.push(p);
+    for (const li of listItems.slice(0, 3)) sampleParts.push(li);
+    for (const cta of ctas.slice(0, 3)) sampleParts.push(cta.label);
+    const text = cleanText(sampleParts.join(" "), 200);
 
     // Heuristic interaction model
     let interactionModel: InteractionModel = "static";
@@ -581,6 +771,7 @@ function extractInPage(): BrowserExtract {
       label: c.label,
       selector: c.selector,
       textSample: text,
+      text: textModel,
       tagName: c.tagName,
       boundingBox: {
         x: Math.round(rect.x + scrollX),

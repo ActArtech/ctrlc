@@ -27,7 +27,7 @@ export const COMMANDS = [
   { name: "register", summary: "Upsert section into .ctrlc/registry.json (auto-merged into config)" },
   { name: "specs-from-ir", summary: "Page IR JSON → docs/research/components/<id>.spec.md (+ topology)" },
   { name: "register-from-spec", summary: "Register section from section.spec.md (id + component path inferred)" },
-  { name: "qa", summary: "Validate + list sections + npm run build (use --no-build to skip)" },
+  { name: "qa", summary: "Validate + list sections + npm run build (use --skip-build to skip; --no-build alias)" },
   { name: "capture", summary: "Page recon -> Page IR + screenshot (scope=page; optional playwright)" },
   {
     name: "materialize-assets",
@@ -62,6 +62,14 @@ export const COMMANDS = [
     summary: "External capture / file-map JSON → CtrlC Page IR (adapter only)",
   },
   {
+    name: "hygienize-ir",
+    summary: "Drop noise sections, dedupe, assign short ids (hero/pricing/faq) on IR",
+  },
+  {
+    name: "scaffold-from-ir",
+    summary: "IR → React section stubs + home.ts content keys + page.tsx order",
+  },
+  {
     name: "doctor",
     summary: "Environment health check (Node, core, capture, playwright, demos)",
   },
@@ -88,6 +96,8 @@ export const PIPELINE_COMMANDS = [
   "register-from-ir",
   "baseline",
   "plan-parallel",
+  "hygienize-ir",
+  "scaffold-from-ir",
   "visual-diff",
   "pipeline",
   "adapt-ir",

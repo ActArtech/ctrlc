@@ -22,6 +22,8 @@ function fixFile(file) {
   const next = src.replace(
     /(from\s+["'])(\.[^"']+)(["'])/g,
     (full, a, spec, c) => {
+      // Skip template-literal fragments (scaffold string builders, etc.)
+      if (spec.includes("${") || spec.includes("`")) return full;
       if (spec.endsWith(".js") || spec.endsWith(".json") || spec.endsWith(".mjs")) {
         return full;
       }

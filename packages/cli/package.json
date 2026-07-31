@@ -12,6 +12,7 @@
   },
   "files": [
     "bin",
+    "dist",
     "src",
     "scripts"
   ],
@@ -19,9 +20,10 @@
     "access": "public"
   },
   "scripts": {
+    "build": "node ./scripts/build-cli.mjs",
     "ctrlc": "node ./bin/ctrlc.mjs",
     "test": "node ./scripts/test-cli.mjs",
-    "prepublishOnly": "node --input-type=module -e \"import fs from 'node:fs'; if (!fs.existsSync('bin/ctrlc.mjs')) { console.error('missing bin/ctrlc.mjs'); process.exit(1); }\""
+    "prepublishOnly": "npm run build && node --input-type=module -e \"import fs from 'node:fs'; if (!fs.existsSync('dist/cli.mjs')) { console.error('missing dist/cli.mjs'); process.exit(1); } if (!fs.existsSync('bin/ctrlc.mjs')) { console.error('missing bin/ctrlc.mjs'); process.exit(1); }\""
   },
   "dependencies": {
     "@ctrlc/capture": "0.1.0",
