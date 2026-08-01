@@ -13,11 +13,12 @@ Turn **$ARGUMENTS** into **reusable React sections** with **SectionPack** dual e
 
 | Lead with | Do not promise |
 |-----------|----------------|
-| Clean **section / component** isolation | “Creates the full website” as the goal |
-| **Recreation guidance** (specs + describe + prompt packs) | Pixel-perfect full-site mirror |
-| **React** multi-file packs | HTML/CSS dump as the product |
+| **React section packs** (dual export) | Full website creation |
+| **Recreation guidance** (specs + describe + prompt packs) | Pixel-perfect full-page mirror |
+| Multi-file **React** packs | HTML scraping / CSS dump as the product |
 | Local-first rebuild you control | Bypassing auth / ToS |
 
+Monorepo demos are **Northline** only. Do not commit third-party product rebuilds into the CtrlC repo.
 **Rights:** Only run on public pages the user may analyze (own site, permission, or lawful research). See monorepo `docs/guide/responsible-use.md`.
 
 ## Product rules

@@ -1,11 +1,11 @@
 /**
  * Scaffold React section stubs + home content + page.tsx from Page IR.
  *
- * Productizes the Tosea clone hand-scaffold:
+ * Emits registered-ready section hosts:
  * components under src/components/sections/, content keys in home.ts,
  * SectionBoundary composition on page.tsx.
  *
- * Never writes HTML dumps - React components only.
+ * Never writes HTML dumps - React section packs only.
  */
 
 import fs from "node:fs";

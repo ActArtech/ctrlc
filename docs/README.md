@@ -1,14 +1,14 @@
 # CtrlC documentation
 
-**CtrlC** extracts **reusable UI sections** from a public page (with rights) and rebuilds them as **React** components - with recreation guidance.  
-Default scope is **one page’s sections**. Full site is optional assembly. Pixel-perfect full-site cloning is **not** the product promise.
+**CtrlC** builds **React section packs** and **recreation guidance** from a public page you may analyze.  
+Not full website creation. Not HTML scraping. Default: one page’s sections; multi-page only when requested.
 
-**SectionPack** is the dual-export layer on every section:
+**SectionPack** dual export on every section:
 
 1. **Natural language** - function, motion, behavior, layout, color, multi-file influences  
 2. **Code as-is** - multi-file component pack (TSX + content + CSS + deps)
 
-Never ship mirrored HTML dumps as the product. Lead with **sections + packs**, not “clone the whole website.”
+Public demos use the fictional **Northline** brand only.
 ## Start here
 
 | Path | Audience |

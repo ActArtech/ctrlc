@@ -2,15 +2,15 @@
 
 Non-negotiable product rules for CtrlC and SectionPack.
 
-## 0. Sections first (positioning)
+## 0. React section packs + recreation guidance
 
 | Lead with | Avoid as the hero pitch |
 |-----------|-------------------------|
-| Reusable UI **sections** and **components** | “Creates the full website” |
-| **Recreation guidance** + dual export | Generic site cloner / scraper |
-| Local React rebuild you control | Pixel-perfect full-site guarantee |
+| **React section packs** (dual export) | Full website creation |
+| **Recreation guidance** (specs, briefs, describe/prompt) | HTML scraping / mirror hosts |
+| Local React rebuild you control | Pixel-perfect full-page guarantee |
 
-Full-page assembly is a **composition** of registered sections. Capture is an aid - not a license or a fidelity SLA.
+A page is a **composition** of registered section packs. Capture is an aid - not a license or a fidelity SLA. Monorepo demos ship **Northline** only - no third-party product clones.
 
 ## 1. React components only
 

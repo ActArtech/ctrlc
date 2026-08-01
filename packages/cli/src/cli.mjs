@@ -196,7 +196,7 @@ Examples:
   ctrlc doctor
 
 Notes:
-  - Positioning: reusable sections + recreation guidance (not full-site HTML mirror).
+  - Positioning: React section packs + recreation guidance (not full website creation or HTML scraping).
   - Pack formats are React multi-file + natural language (never HTML dumps).
   - init-clone pre-wires SectionPack so every section host can dual-export from day one.
   - register updates .ctrlc/registry.json (merged automatically when loading config).

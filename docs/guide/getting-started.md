@@ -4,9 +4,9 @@
 
 | Piece | Role |
 |-------|------|
-| **CtrlC** | Extract and rebuild **reusable React sections** from a page (not HTML mirrors, not a full-site cloner pitch) |
+| **CtrlC** | **React section packs + recreation guidance** (not full website creation, not HTML scraping) |
 | **SectionPack** | Per-section dual export: **natural language** guidance + **code as-is** packs |
-| **Northline demo** | Fictional analytics brand on port **3040** (original assets only) |
+| **Northline demo** | Fictional analytics brand on port **3040** - only product demo brand in this repo |
 
 Read [Responsible use](./responsible-use.md) before capturing third-party URLs.
 

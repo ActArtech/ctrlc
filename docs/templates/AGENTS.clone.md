@@ -6,10 +6,11 @@
 
 ## Positioning
 
-- **Extract reusable sections** + recreation guidance - not “full website clone.”  
+- **React section packs + recreation guidance** - not full website creation or HTML scraping.  
 - **Dual export** (NL brief + multi-file React pack) is the product hand-off.  
-- **Fidelity ladder:** structure → content → visual pass. Capture alone is not pixel-perfect.  
-- Only analyze pages the owner has **rights** to use. See monorepo `docs/guide/responsible-use.md`.
+- **Fidelity ladder:** structure → content → visual pass. Capture alone is not pixel parity.  
+- Only analyze pages the owner has **rights** to use. See monorepo `docs/guide/responsible-use.md`.  
+- Do not ship third-party commercial brands as the product demo; monorepo uses **Northline** only.
 
 ## Non-negotiable
 

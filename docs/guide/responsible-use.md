@@ -8,12 +8,14 @@ It is **not** a tool for bulk commercial site theft, phishing, or bypassing acce
 
 | Lead with | Do not lead with |
 |-----------|------------------|
-| Reusable sections / components | “Clone any full website” |
-| Recreation guidance + dual export | Pixel-perfect full-site mirror |
+| **React section packs** | Full website creation |
+| **Recreation guidance** + dual export | Pixel-perfect full-page mirror |
 | Local React reconstruction | HTML scrape / mirror host |
 | Pages you have rights to use | Anything behind login / ToS bans |
 
 Capture and pipeline outputs are **starting points for original reimplementation** - structure, content samples, and design notes - not a grant of rights to third-party brands, logos, or copy.
+
+**Repo demos:** only the fictional **Northline** brand ships in this monorepo. Third-party product rebuilds (if any) are local tests outside the product tree - never publish them as CtrlC itself.
 
 ## Allowed (examples)
 

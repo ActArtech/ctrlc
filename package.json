@@ -2,7 +2,7 @@
   "name": "ctrlc",
   "version": "0.1.0",
   "private": true,
-  "description": "CtrlC: extract reusable UI sections from a public page into React, with SectionPack dual export (natural language guidance + multi-file code packs). Not an HTML dump; not a full-site mirror product.",
+  "description": "CtrlC: React section packs + recreation guidance (SectionPack dual export). Not full website creation; not HTML scraping.",
   "license": "MIT",
   "keywords": [
     "ctrlc",

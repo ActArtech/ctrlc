@@ -9,10 +9,10 @@ Versions follow [SemVer](https://semver.org/) once 1.0.0 is cut. Pre-1.0 APIs ma
 
 ### Changed - Positioning
 
-- Lead with **reusable UI sections + recreation guidance + dual export**, not full-site cloning
+- Lead with **React section packs + recreation guidance** (not full website creation or HTML scraping)
 - Document **fidelity ladder** (structure → content → visual pass)
 - Strengthen **responsible use** (rights, ToS, no HTML dumps as product)
-- README, principles, clone skill, AGENTS template, docs hub aligned
+- Remove third-party product names from fixtures/comments; demos remain **Northline** only
 
 ## [0.1.0] - 2026-07-31
 
@@ -46,6 +46,5 @@ Versions follow [SemVer](https://semver.org/) once 1.0.0 is cut. Pre-1.0 APIs ma
 
 ### Notes
 
-- MVP suitable for local clone + SectionPack demos
-- npm publish deferred until API is marked stable (G2)
-- Live URL capture requires optional Playwright install
+- MVP: React section packs + dual export for local use
+- Not full website creation; not HTML scraping as the product

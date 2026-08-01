@@ -76,7 +76,7 @@ console.log("@ctrlc/capture materialize-assets tests\n");
 // --- Next.js image URL rewrite ---
 console.log("resolveAssetFetchUrl (Next image)");
 const nextUrl =
-  "https://tosea.ai/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo.abc123.png&w=256&q=75";
+  "https://example.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Flogo.abc123.png&w=256&q=75";
 const resolved = resolveAssetFetchUrl(nextUrl);
 assert(resolved.rewritten, "next image marked rewritten");
 assert(

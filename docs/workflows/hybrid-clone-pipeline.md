@@ -1,6 +1,6 @@
 # Hybrid section pipeline (Ditto-inspired + agent-inspired)
 
-CtrlC’s recommended end-to-end flow **extracts reusable sections** and rebuilds them in React with recreation guidance. It is **not** a “full website cloner” product promise.
+CtrlC’s recommended end-to-end flow builds **React section packs** with **recreation guidance**. It is **not** full website creation or HTML scraping.
 
 Flow:
 

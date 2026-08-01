@@ -1,6 +1,6 @@
 # Contributing
 
-**Positioning:** CtrlC extracts **reusable UI sections** and **recreation guidance** (SectionPack dual export) - not a full-site HTML cloner. Prefer that framing in docs, issues, and PRs. See [docs/guide/principles.md](docs/guide/principles.md) and [docs/guide/responsible-use.md](docs/guide/responsible-use.md).
+**Positioning:** **React section packs + recreation guidance** (SectionPack dual export). Not full website creation or HTML scraping. Prefer that framing in docs, issues, and PRs. Do not add third-party product clones (e.g. commercial site rebuilds) to this monorepo - demos stay **Northline** only. See [docs/guide/principles.md](docs/guide/principles.md) and [docs/guide/responsible-use.md](docs/guide/responsible-use.md).
 
 ## Docs
 

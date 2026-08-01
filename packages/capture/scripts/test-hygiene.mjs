@@ -59,7 +59,7 @@ assert(
     label: "header",
     interactionModel: "hybrid",
     selector: "header",
-    textSample: "Tosea.ai Features Pricing Sign in Start for free",
+    textSample: "Northline Features Pricing Sign in Start for free",
     boundingBox: { x: 0, y: 0, width: 1200, height: 64 },
   }),
   "header landmark kept",
@@ -103,11 +103,11 @@ assert(deduped[0].selector === "section", "prefer landmark/section over div");
 // --- semantic ids ---
 const withIds = assignStableIds([
   {
-    id: "turn-clinical-multi-omics-studies-into-lab-meeti",
-    label: "Turn clinical multi-omics studies into lab-meeting decks",
+    id: "ship-analytics-that-teams-actually-open",
+    label: "Ship analytics that teams actually open",
     interactionModel: "hybrid",
     textSample:
-      "Your professional presentation assistant Distill credit research into committee-ready slides",
+      "Your professional presentation workspace Ship analytics that teams actually open",
     selector: "section",
   },
   {
@@ -128,7 +128,7 @@ const withIds = assignStableIds([
     id: "header-long",
     label: "header",
     interactionModel: "hybrid",
-    textSample: "Tosea Sign in Start for free",
+    textSample: "Northline Sign in Start for free",
     selector: "header.site-header",
   },
 ]);
@@ -143,7 +143,7 @@ assert(
   "pricing keeps full title label",
 );
 
-// --- full pipeline (tosea-like noise) ---
+// --- full pipeline (noisy landing IR) ---
 const messy = [
   {
     id: "div",
@@ -158,7 +158,7 @@ const messy = [
     label: "header",
     interactionModel: "hybrid",
     selector: "header",
-    textSample: "Tosea Features Pricing",
+    textSample: "Northline Features Pricing",
   },
   {
     id: "main-navigation",
@@ -172,7 +172,7 @@ const messy = [
     label: "header",
     interactionModel: "hybrid",
     selector: "div",
-    textSample: "Tosea Features Pricing",
+    textSample: "Northline Features Pricing",
   },
   {
     id: "see-it-in-action",
