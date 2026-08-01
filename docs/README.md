@@ -13,6 +13,7 @@ Public demos use the fictional **Northline** brand only.
 
 | Path | Audience |
 |------|----------|
+| [**Completed work**](./COMPLETED_WORK.md) | What shipped in 0.1.x and what is still open |
 | [Guide: Getting started](./guide/getting-started.md) | First install + demo |
 | [Guide: Principles](./guide/principles.md) | Non-negotiable product rules |
 | [Guide: Responsible use](./guide/responsible-use.md) | Legal / ethics |

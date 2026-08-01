@@ -61,6 +61,7 @@ Public demos use the fictional **Northline** brand only. No third-party product 
 | CLI reference | [docs/reference/cli.md](docs/reference/cli.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| **Completed work** | [docs/COMPLETED_WORK.md](docs/COMPLETED_WORK.md) |
 | **Path to 1.0** | [docs/roadmap/PATH_TO_1.0.md](docs/roadmap/PATH_TO_1.0.md) |
 | Eval harness | [docs/eval/README.md](docs/eval/README.md) |
 
