@@ -4,9 +4,11 @@
 
 | Piece | Role |
 |-------|------|
-| **CtrlC** | Scaffold and compose **React** page sections (not HTML mirrors) |
-| **SectionPack** | Per-section dual export: **natural language** + **code as-is** |
-| **Northline demo** | Fictional analytics brand on port **3040** |
+| **CtrlC** | Extract and rebuild **reusable React sections** from a page (not HTML mirrors, not a full-site cloner pitch) |
+| **SectionPack** | Per-section dual export: **natural language** guidance + **code as-is** packs |
+| **Northline demo** | Fictional analytics brand on port **3040** (original assets only) |
+
+Read [Responsible use](./responsible-use.md) before capturing third-party URLs.
 
 ## Prerequisites
 

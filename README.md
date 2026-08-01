@@ -5,36 +5,48 @@
 [![Tests](https://img.shields.io/badge/tests-core%20%7C%20cli%20%7C%20capture%20%7C%20mcp-success)](package.json)
 [![Status](https://img.shields.io/badge/status-0.1.x%20MVP-informational)](CHANGELOG.md)
 
-**CtrlC** (like Ctrl+C: **copy components**) rebuilds a **page** (default) or site as **React / Next** components.
+**CtrlC** (like Ctrl+C: **copy components**) turns a **public page you have rights to analyze** into **reusable UI sections** and **recreation guidance** - not a full-site mirror and not an HTML dump.
 
 **SectionPack** is the dual-export layer on every section:
 
-1. **Natural language** - function, motion, behavior, layout, color, multi-file influences  
+1. **Natural language** - what it does, motion, behavior, layout, color, multi-file influences  
 2. **Code as-is** - multi-file pack (TSX + content + CSS + deps)
 
-Never ship mirrored HTML dumps as the product.
+> **Lead with sections, not “clone the whole website.”**  
+> Extract clean, reusable blocks (hero, pricing, nav, FAQ, …) and guidance to rebuild them in React. Full-page composition is optional assembly - pixel-perfect full-site cloning is **not** the product promise.
 
-## Why
+## Why this is useful
+
+Developers and designers already reverse-engineer UI by hand. CtrlC automates the hard parts:
 
 | Need | CtrlC |
-|------|-----------|
-| Clone for redesign | React sections + specs, not a static HTML mirror |
-| Agent-friendly rebuild | Specs, parallel plan, MCP tools |
-| Hand-off / remix | Natural language brief **and** code pack per section |
-| Drift control | Snapshots, contentHash, CI drift check |
+|------|--------|
+| Isolate reusable UI | Section IR + specs + React section components |
+| Hand-off to humans or agents | **Dual export**: brief + multi-file code pack |
+| Local control / privacy | CLI-first; work stays on your machine |
+| Avoid HTML scrapers | **React reconstruction** only - never ship mirrored HTML as the app |
+| Redesign / migrate | Structure + content + tokens as a starting point |
+
+## What CtrlC is not
+
+| Not this | Instead |
+|----------|---------|
+| Generic full-site cloner | **Section / component extraction** + assembly |
+| Pixel-perfect mirror guarantee | Structure → content → optional visual fidelity pass |
+| HTML/CSS dump product | **React** sections + SectionPack |
+| Bypass auth / ToS scraper | Public pages you may analyze; see [responsible use](docs/guide/responsible-use.md) |
 
 ## Feature map
 
 | Area | What you get |
 |------|----------------|
-| **Clone** | `init-clone`, capture IR, `pipeline`, `adapt-ir` (external file-map) |
-| **Specs** | `specs-from-ir`, templates, multi-state + breakpoint matrix |
-| **Scaffold** | `scaffold-from-ir` - React stubs + `home.ts` + `page.tsx` (also in `pipeline`) |
-| **Build** | `plan-parallel`, section-builder prompts, React-only host |
-| **SectionPack** | describe / prompt / zip / recipes / catalog + preview thumbs |
-| **Quality** | `qa`, `doctor`, baseline, optional `visual-diff` |
-| **Agents** | skill + MCP (`@ctrlc/mcp`) |
-| **Ship** | Docker demo, GitHub Actions CI, MIT |
+| **Sections** | Capture IR, hygiene, specs, `scaffold-from-ir`, register |
+| **Guidance** | Specs, behavior briefs, builder prompts, `describe` / `prompt` packs |
+| **SectionPack** | Dual export, recipes, catalog, graph, library, drift |
+| **Pipeline** | `init-clone`, `pipeline`, tokens (`--ts-*`), assets, baseline |
+| **Quality** | `qa` (`--skip-build` when dev runs), `doctor`, optional visual-diff |
+| **Agents** | Skills + MCP (`@ctrlc/mcp`) |
+| **Ship** | Docker demo, CI, MIT |
 
 ## Documentation
 
@@ -44,11 +56,11 @@ Never ship mirrored HTML dumps as the product.
 |-------|------|
 | Getting started | [docs/guide/getting-started.md](docs/guide/getting-started.md) |
 | Principles | [docs/guide/principles.md](docs/guide/principles.md) |
-| Hybrid clone pipeline | [docs/workflows/hybrid-clone-pipeline.md](docs/workflows/hybrid-clone-pipeline.md) |
+| **Responsible use** | [docs/guide/responsible-use.md](docs/guide/responsible-use.md) |
+| Hybrid pipeline | [docs/workflows/hybrid-clone-pipeline.md](docs/workflows/hybrid-clone-pipeline.md) |
 | CLI reference | [docs/reference/cli.md](docs/reference/cli.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
-| MCP setup | [packages/mcp/README.md](packages/mcp/README.md) |
 
 ## Repo layout
 
@@ -63,7 +75,7 @@ CtrlC/
     mcp/       @ctrlc/mcp        stdio MCP for agents
   examples/
     next-demo/       Northline demo (:3040)
-    clone-template/  empty clone host
+    clone-template/  empty section host
   docs/        guide, concepts, reference, workflows
   scripts/     scaffold, drift, parallel plan wrapper
 ```
@@ -94,8 +106,6 @@ npm run dev:demo
 
 **Keys:** `Ctrl/Cmd+Shift+P` packs on/off · hover section → **Natural language** / **Code as-is**
 
-Health check:
-
 ```bash
 npm run ctrlc -- doctor
 ```
@@ -107,30 +117,33 @@ npm run docker:demo
 # http://localhost:3040
 ```
 
-See [examples/next-demo/README.md](examples/next-demo/README.md).
+## Extract sections from a public page (one page)
 
-## Clone pipeline (one page)
+Use only on URLs you have **rights to analyze** (your site, licensed work, or permitted research). See [responsible use](docs/guide/responsible-use.md).
 
 ```bash
 npm run build
-ctrlc init-clone ../my-clone --url https://example.com --scope page
-cd ../my-clone && npm install
+ctrlc init-clone ../my-sections --url https://example.com --scope page
+cd ../my-sections && npm install
 
 # Live URL (needs: npm i -D playwright && npx playwright install chromium)
 ctrlc pipeline --url https://example.com --cwd . --out runs/example.com
 
-# Or offline IR / external tool export
-# ctrlc adapt-ir --input external.json --out runs/adapted/ir.json
-# ctrlc pipeline --ir runs/adapted/ir.json --cwd .
-
 ctrlc plan-parallel --cwd . --format md
-# Agents build React sections from docs/research/components/*.spec.md
+# Build React sections from docs/research/components/*.spec.md
 ctrlc register-from-spec --cwd . --spec docs/research/components/hero.spec.md
-ctrlc qa --cwd .
-npm run dev
+ctrlc pack hero --format describe --cwd .
+ctrlc pack hero --format prompt-short --cwd .
+ctrlc qa --cwd . --skip-build   # while npm run dev is running
 ```
 
-Skill (Claude): `.claude/skills/ctrlc-clone/SKILL.md`  
+**Fidelity ladder (honest):**
+
+1. **Structure** - section order, ids, dual export  
+2. **Content** - copy, CTAs, assets  
+3. **Visual pass** - tokens, layout, polish (manual / agent; not guaranteed by capture alone)
+
+Skill: `.claude/skills/ctrlc-clone/SKILL.md`  
 Builder prompt: `docs/templates/section-builder.prompt.md`
 
 ## Everyday SectionPack commands
@@ -148,22 +161,33 @@ npm run snapshot && npm run check:drift
 
 | Rule | Detail |
 |------|--------|
-| Page-first | Full site is optional |
-| React only | Never HTML product dumps |
-| Dual export | NL brief + code pack on every section |
-| Config-first | Every section registered for packs |
-| Responsible use | Rights, ToS, no phishing clones |
+| **Sections first** | Reusable blocks + packs; not “full website clone” as the pitch |
+| **Page default** | One URL → sections; full site only when requested |
+| **React only** | Never HTML product dumps |
+| **Dual export** | NL brief + multi-file code pack on every section |
+| **Config-first** | Every section registered for packs |
+| **Responsible use** | Rights, ToS, no phishing / brand theft |
 
 ## Status
 
-**0.1.x MVP** - hybrid clone + SectionPack path is implemented and tested. APIs may still evolve before 1.0.
+**0.1.x MVP** - section extraction + SectionPack dual export path is implemented and tested. APIs may evolve before 1.0.
 
 | Ready | Notes |
 |-------|--------|
-| Local clone + dual export | Yes |
+| Local section pipeline + dual export | Yes |
 | Demo + Docker + CI | Yes |
 | MCP for agents | Yes (MVP) |
 | npm publish | Metadata ready; not published yet |
 | Live URL capture | Optional Playwright peer |
+| Pixel-perfect full page | **Not** a product guarantee |
+
+## Responsible use
+
+- Analyze **public** pages you own or have permission to study.  
+- Rebuild for migration, redesign, learning, or internal sandboxes - not impersonation or phishing.  
+- Respect site terms; do not bypass auth or paywalls.  
+- Output is a **starting point for original React reimplementation**, not a license to copy brand assets or trademarks.
+
+Full policy: [docs/guide/responsible-use.md](docs/guide/responsible-use.md).
 
 MIT license. See [LICENSE](LICENSE).

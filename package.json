@@ -2,14 +2,16 @@
   "name": "ctrlc",
   "version": "0.1.0",
   "private": true,
-  "description": "CtrlC: clone a page (or site) into React components. SectionPack: natural language + code-as-is export per section. Never HTML dumps.",
+  "description": "CtrlC: extract reusable UI sections from a public page into React, with SectionPack dual export (natural language guidance + multi-file code packs). Not an HTML dump; not a full-site mirror product.",
   "license": "MIT",
   "keywords": [
     "ctrlc",
     "sectionpack",
     "react",
     "nextjs",
-    "clone",
+    "ui-sections",
+    "dual-export",
+    "recreation-guidance",
     "design-system",
     "agent",
     "mcp"

@@ -1,19 +1,26 @@
-# Agent notes — CtrlC clone
+# Agent notes — CtrlC section rebuild
 
 **Source URL:** {{SOURCE_URL}}  
 **Scope:** {{SCOPE}} (page default; site only if requested)  
 **Stack:** Next.js App Router + React sections + **SectionPack**
 
+## Positioning
+
+- **Extract reusable sections** + recreation guidance - not “full website clone.”  
+- **Dual export** (NL brief + multi-file React pack) is the product hand-off.  
+- **Fidelity ladder:** structure → content → visual pass. Capture alone is not pixel-perfect.  
+- Only analyze pages the owner has **rights** to use. See monorepo `docs/guide/responsible-use.md`.
+
 ## Non-negotiable
 
-1. **React components only** — never ship HTML dumps / wget mirrors as the product.  
-2. **Page-first** — clone the target URL page unless scope=site.  
-3. **Dual export always** — after each section builds, register it for:
+1. **React components only** - never ship HTML dumps / wget mirrors as the product.  
+2. **Sections first** - isolate hero, pricing, nav, etc.; page is composition of sections.  
+3. **Page-first** - one URL unless scope=site.  
+4. **Dual export always** - after each section builds, register it for:
    - **Natural language** (`describe`)
    - **Code as-is** (`prompt` / zip)  
-4. **Spec before build** — write `docs/research/components/<id>.spec.md` first.  
-5. **Build must compile** — `npm run build` / `ctrlc qa` before done. While `npm run dev` is running, use `ctrlc qa --skip-build` for validate/list without a production build (`--no-build` alias).
-
+5. **Spec before build** - write `docs/research/components/<id>.spec.md` first.  
+6. **Build must compile** - `npm run build` / `ctrlc qa` before done. While `npm run dev` is running, use `ctrlc qa --skip-build` (`--no-build` alias).
 ## SectionPack auto-register (required)
 
 After each section component is implemented:

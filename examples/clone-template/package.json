@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Empty CtrlC clone host: SectionPack wired, no demo sections. Use with ctrlc init-clone or copy this folder.",
+  "description": "Empty CtrlC section host: SectionPack wired, no demo sections. Use with ctrlc init-clone for page section rebuilds.",
   "license": "MIT",
   "engines": {
     "node": ">=20"

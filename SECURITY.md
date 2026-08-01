@@ -22,9 +22,11 @@ You should get an acknowledgement when the maintainer is available.
 ## Scope notes
 
 - CtrlC can fetch public URLs for **capture** and **asset materialization**. Only use it on sites you have rights to inspect and rebuild.
-- Do not point capture at authenticated product backends expecting a full clone of private data.
+- Product goal is **section extraction + React recreation guidance**, not guaranteed full-site mirroring or private data exfiltration.
+- Do not point capture at authenticated product backends or paywalled content.
 - Optional peers (Playwright, pngjs, pixelmatch) are third-party; keep them updated when installed.
-- Generated clone apps are user code: treat secrets, env files, and deploy credentials carefully.
+- Generated apps are user code: treat secrets, env files, and deploy credentials carefully.
+- See [docs/guide/responsible-use.md](docs/guide/responsible-use.md).
 
 ## Supply chain
 

@@ -5,6 +5,15 @@ All notable changes to CtrlC packages are documented in this file.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [SemVer](https://semver.org/) once 1.0.0 is cut. Pre-1.0 APIs may change.
 
+## [Unreleased]
+
+### Changed - Positioning
+
+- Lead with **reusable UI sections + recreation guidance + dual export**, not full-site cloning
+- Document **fidelity ladder** (structure → content → visual pass)
+- Strengthen **responsible use** (rights, ToS, no HTML dumps as product)
+- README, principles, clone skill, AGENTS template, docs hub aligned
+
 ## [0.1.0] - 2026-07-31
 
 ### Added - SectionPack

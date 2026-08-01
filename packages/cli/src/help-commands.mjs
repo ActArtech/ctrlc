@@ -23,7 +23,7 @@ export const COMMANDS = [
   { name: "watch", summary: "Watch section sources; rebuild on change (optional --snapshot)" },
   { name: "library", summary: "Export section library (NL + code pack + meta) for agent context" },
   { name: "schema", summary: "Print SectionPackConfig JSON Schema (draft-07) to stdout" },
-  { name: "init-clone", summary: "Scaffold React/Next clone + research dirs + SectionPack + skill" },
+  { name: "init-clone", summary: "Scaffold React/Next section host + research dirs + SectionPack + skill" },
   { name: "register", summary: "Upsert section into .ctrlc/registry.json (auto-merged into config)" },
   { name: "specs-from-ir", summary: "Page IR JSON → docs/research/components/<id>.spec.md (+ topology)" },
   { name: "register-from-spec", summary: "Register section from section.spec.md (id + component path inferred)" },

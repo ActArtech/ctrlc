@@ -1,10 +1,16 @@
-# Hybrid clone pipeline (Ditto-inspired + agent-inspired)
+# Hybrid section pipeline (Ditto-inspired + agent-inspired)
 
-CtrlC’s recommended end-to-end flow combines:
+CtrlC’s recommended end-to-end flow **extracts reusable sections** and rebuilds them in React with recreation guidance. It is **not** a “full website cloner” product promise.
 
-1. **Deterministic capture / recon artifacts** (Ditto-style thinking)  
-2. **Spec-driven parallel React rebuild** (AI cloner template-style)  
-3. **SectionPack dual export** (CtrlC differentiator)
+Flow:
+
+1. **Deterministic capture / recon** (Ditto-style thinking) → Page IR, assets, tokens  
+2. **Spec-driven parallel React rebuild** (section-by-section)  
+3. **SectionPack dual export** (NL brief + multi-file code pack)  
+
+**Fidelity ladder:** structure → content → visual pass. Capture alone does not guarantee pixel parity.
+
+**Rights:** only on pages you may analyze. See [responsible use](../guide/responsible-use.md).
 
 ## Modes
 

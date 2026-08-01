@@ -1,13 +1,14 @@
 # CtrlC documentation
 
-**CtrlC** builds **React** marketing pages (one page by default, full site optional).  
+**CtrlC** extracts **reusable UI sections** from a public page (with rights) and rebuilds them as **React** components - with recreation guidance.  
+Default scope is **one page’s sections**. Full site is optional assembly. Pixel-perfect full-site cloning is **not** the product promise.
+
 **SectionPack** is the dual-export layer on every section:
 
 1. **Natural language** - function, motion, behavior, layout, color, multi-file influences  
 2. **Code as-is** - multi-file component pack (TSX + content + CSS + deps)
 
-Never ship mirrored HTML dumps as the product.
-
+Never ship mirrored HTML dumps as the product. Lead with **sections + packs**, not “clone the whole website.”
 ## Start here
 
 | Path | Audience |

@@ -196,8 +196,9 @@ Examples:
   ctrlc doctor
 
 Notes:
+  - Positioning: reusable sections + recreation guidance (not full-site HTML mirror).
   - Pack formats are React multi-file + natural language (never HTML dumps).
-  - init-clone pre-wires SectionPack so every clone can dual-export from day one.
+  - init-clone pre-wires SectionPack so every section host can dual-export from day one.
   - register updates .ctrlc/registry.json (merged automatically when loading config).
   - specs-from-ir fills id, label, interaction model, text sample, rebuild guidance from IR.
   - register-from-spec infers id from filename and component path src/components/sections/<Pascal>.tsx.

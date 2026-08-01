@@ -1,7 +1,7 @@
 {
   "name": "@ctrlc/capture",
   "version": "0.1.0",
-  "description": "CtrlC page capture: Playwright recon into Page IR for React rebuild (never HTML dumps).",
+  "description": "CtrlC page capture: Playwright recon into Page IR for section isolation and React rebuild (never HTML dumps).",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

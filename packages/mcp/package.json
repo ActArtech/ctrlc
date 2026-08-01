@@ -1,7 +1,7 @@
 {
   "name": "@ctrlc/mcp",
   "version": "0.1.0",
-  "description": "Lightweight MCP server for CtrlC SectionPack tools (list, pack, validate). Packs first, not full clone.",
+  "description": "Lightweight MCP server for CtrlC SectionPack tools (list, pack, validate). Dual-export packs first; not a full-site cloner.",
   "license": "MIT",
   "type": "module",
   "bin": {

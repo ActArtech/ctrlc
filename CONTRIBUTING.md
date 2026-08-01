@@ -1,5 +1,7 @@
 # Contributing
 
+**Positioning:** CtrlC extracts **reusable UI sections** and **recreation guidance** (SectionPack dual export) - not a full-site HTML cloner. Prefer that framing in docs, issues, and PRs. See [docs/guide/principles.md](docs/guide/principles.md) and [docs/guide/responsible-use.md](docs/guide/responsible-use.md).
+
 ## Docs
 
 Start at **[docs/README.md](docs/README.md)**.
