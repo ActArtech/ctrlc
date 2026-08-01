@@ -115,6 +115,31 @@ Implementable backlog derived from studying **Ditto** (deterministic capture) an
 
 ---
 
+## Epic H - Path to 1.0
+
+Roadmap detail: `docs/roadmap/PATH_TO_1.0.md`, freeze: `docs/roadmap/API_FREEZE.md`, eval: `docs/eval/README.md`.
+
+Positioning: React section packs + recreation guidance only. Monorepo demos: **Northline** only. Rights-cleared third-party tests stay outside the repo. Do not npm publish until freeze + checklist.
+
+| ID | Item | Pri | Status | Notes |
+|----|------|-----|--------|-------|
+| H1 | Real-page corpus (8-12 rights-cleared) | P0 | todo | Outside monorepo; metrics on compile %, visual similarity, time-to-pack, human fix-up; use example.com-style placeholders in public docs only |
+| H2 | Metrics harness | P0 | todo | Document + scripts under eval; link from PATH_TO_1.0; smoke pack/build gates first |
+| H3 | API freeze (config, formats, CLI) | P0 | doing | `docs/roadmap/API_FREEZE.md`; freeze SectionPackConfig + describe/prompt/prompt-short/zip/json + pack/list/validate/qa at 0.4/0.5 |
+| H4 | npm publish `@ctrlc/*` | P1 | todo | After freeze; G2 continue; publishConfig ready; changelog + doctor/tests green; not done in this doc pass |
+| H5 | Capture quality (heuristics/hygiene) | P0 | todo | Drive from corpus failures; section ids, text model, noise reduction |
+| H6 | Multi-state fidelity | P1 | todo | Specs/briefs/capture reflect hover/focus/open/loading/error/reduced-motion beyond checklist-only |
+| H7 | Foundation gate | P0 | todo | Tokens + shell + registry + build green before parallel section agents |
+| H8 | Agent eval harnesses | P1 | todo | Skill + library offline context scored; see docs/eval |
+| H9 | MCP expand | P2 | todo | Grow tools only when eval/product need; keep pack-first MVP stable |
+| H10 | Public examples (2-3 before/after) | P1 | todo | Northline + original/rights-cleared; dual export story; no third-party brands in-repo |
+| H11 | Demo GIF / video | P2 | todo | Pack HUD + dual export walkthrough; Codespace optional |
+| H12 | Hardening / a11y for 1.0 | P1 | todo | Tests, doctor, changelog discipline, perf, a11y notes; PATH_TO_1.0 band exit |
+
+**Exit H (toward 1.0):** Corpus metrics known; frozen surface published; agents eval'd; proof artifacts exist; hardening matches claims. Still not full website creation or HTML scraping.
+
+---
+
 ## Suggested implementation order (sprints)
 
 ### Sprint 1 - Agent-ready clone skill (P0)
@@ -207,4 +232,4 @@ Then:
 
 - Vendoring Ditto or JCodesMore source trees into packages  
 - Claiming pixel-perfect on sites you do not have rights to  
-- Replaying authenticated product backends as “clone complete”  
+- Replaying authenticated product backends as "clone complete"

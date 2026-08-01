@@ -61,6 +61,8 @@ Public demos use the fictional **Northline** brand only. No third-party product 
 | CLI reference | [docs/reference/cli.md](docs/reference/cli.md) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| **Path to 1.0** | [docs/roadmap/PATH_TO_1.0.md](docs/roadmap/PATH_TO_1.0.md) |
+| Eval harness | [docs/eval/README.md](docs/eval/README.md) |
 
 ## Repo layout
 
@@ -167,6 +169,15 @@ npm run snapshot && npm run check:drift
 | **React only** | Never HTML product dumps |
 | **Config-first** | Every section registered for packs |
 | **Responsible use** | Rights, ToS, no phishing / brand theft |
+
+## Path to 1.0 (next)
+
+Honest MVP gaps and the prioritized climb (real-page corpus → API freeze → npm → agent reliability → distribution) live in **[docs/roadmap/PATH_TO_1.0.md](docs/roadmap/PATH_TO_1.0.md)**.
+
+```bash
+npm run eval:northline   # score in-repo Northline dual-export loop
+npm run eval:aggregate   # summarize docs/eval/results
+```
 
 ## Status
 

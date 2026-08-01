@@ -1,7 +1,7 @@
 # CtrlC documentation
 
 **CtrlC** builds **React section packs** and **recreation guidance** from a public page you may analyze.  
-Not full website creation. Not HTML scraping. Default: one page’s sections; multi-page only when requested.
+Not full website creation. Not HTML scraping. Default: one page's sections; multi-page only when requested.
 
 **SectionPack** dual export on every section:
 
@@ -41,6 +41,18 @@ Public demos use the fictional **Northline** brand only.
 | [Watch and drift](./workflows/watch-and-drift.md) | Live rebuild + CI fingerprints |
 | [Scaffold apps](./workflows/scaffold.md) | `create-ctrlc-app` |
 
+## Roadmap
+
+| Path | Topic |
+|------|--------|
+| [Path to 1.0](./roadmap/PATH_TO_1.0.md) | 0.1.x MVP → 0.5 → 1.0 priorities, gaps, version bands |
+| [Versioning](./roadmap/VERSIONING.md) | 0.1.x / 0.2–0.4 / 0.5–0.8 / 1.0 bands |
+| [Distribution](./roadmap/DISTRIBUTION.md) | npm order, examples, media, publish readiness gate |
+| [API freeze policy](./roadmap/API_FREEZE.md) | Stable config, export formats, CLI; SemVer + changelog |
+| [Eval harness](./eval/README.md) | Metrics and agent/pack evaluation |
+| [Agent eval protocol](./eval/AGENT_EVAL.md) | Skill-run reliability + structure score ≥ 0.7 |
+| [Demo media](./media/README.md) | Northline-only GIF/video capture notes |
+
 ## Research and backlog
 
 | Path | Topic |
@@ -74,6 +86,8 @@ docs/
   workflows/                <- day-to-day / agent pipelines
   packages/                 <- per-package notes
   research/                 <- prior art + attribution
+  roadmap/                  <- path to 1.0 + API freeze
+  eval/                     <- metrics and harness docs
   backlog/                  <- epic status
   templates/                <- specs + builder prompts
 ```

@@ -1,0 +1,45 @@
+{
+  "caseId": "northline-demo",
+  "sourceUrl": "internal Northline demo (examples/next-demo)",
+  "rightsNote": "Owned fictional brand shipping in the monorepo; not a third-party commercial site.",
+  "date": null,
+  "gitSha": null,
+  "pipelineMode": "existing-host",
+  "pipeline": {
+    "initClone": { "attempted": false, "ok": null },
+    "capture": { "attempted": false, "ok": null },
+    "hygiene": { "attempted": false, "ok": null },
+    "tokens": { "attempted": false, "ok": null },
+    "specs": { "attempted": false, "ok": null },
+    "scaffold": { "attempted": false, "ok": null },
+    "register": { "attempted": true, "ok": true },
+    "qa": { "attempted": true, "ok": null }
+  },
+  "sections": {
+    "total": null,
+    "registered": null,
+    "dualExportOk": null,
+    "dualExportSampled": null,
+    "ids": [],
+    "dualExportDetails": []
+  },
+  "compile": {
+    "firstPassQaOk": null,
+    "buildSkipped": true,
+    "validateOk": null,
+    "listOk": null
+  },
+  "visual": {
+    "baselineExists": false,
+    "visualDiffScore": null
+  },
+  "human": {
+    "fixUpMinutes": 0,
+    "notes": "In-repo Northline demo; offline structure + dual-export gate."
+  },
+  "scores": {
+    "structureScore": null,
+    "contentScore": null,
+    "overall": null
+  }
+}

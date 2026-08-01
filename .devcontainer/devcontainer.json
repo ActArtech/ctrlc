@@ -1,0 +1,21 @@
+{
+  "name": "CtrlC monorepo",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "forwardPorts": [3040],
+  "portsAttributes": {
+    "3040": {
+      "label": "Northline demo",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": ["dbaeumer.vscode-eslint"]
+    }
+  },
+  "remoteUser": "node"
+}

@@ -40,7 +40,9 @@
     "init-clone": "node packages/cli/bin/ctrlc.mjs init-clone",
     "dev:demo": "npm run dev -w @ctrlc/next-demo",
     "build:demo": "npm run build -w @ctrlc/next-demo",
-    "docker:demo": "docker compose up --build demo"
+    "docker:demo": "docker compose up --build demo",
+    "eval:northline": "node scripts/eval/score-case.mjs --case docs/eval/cases/northline-demo/case.json --cwd examples/next-demo --out docs/eval/results/northline-demo.json",
+    "eval:aggregate": "node scripts/eval/aggregate-results.mjs"
   },
   "bin": {
     "ctrlc": "./packages/cli/bin/ctrlc.mjs"

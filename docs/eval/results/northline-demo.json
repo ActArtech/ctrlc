@@ -1,0 +1,100 @@
+{
+  "caseId": "northline-demo",
+  "sourceUrl": "internal Northline demo (examples/next-demo)",
+  "rightsNote": "Owned fictional brand shipping in the monorepo; not a third-party commercial site.",
+  "date": "2026-08-01",
+  "gitSha": "b491026",
+  "scoredAt": "2026-08-01T02:18:59.580Z",
+  "hostCwd": "examples/next-demo",
+  "pipelineMode": "existing-host",
+  "pipeline": {
+    "initClone": {
+      "attempted": false,
+      "ok": null
+    },
+    "capture": {
+      "attempted": false,
+      "ok": null
+    },
+    "hygiene": {
+      "attempted": false,
+      "ok": null
+    },
+    "tokens": {
+      "attempted": false,
+      "ok": null
+    },
+    "specs": {
+      "attempted": false,
+      "ok": null
+    },
+    "scaffold": {
+      "attempted": false,
+      "ok": null
+    },
+    "register": {
+      "attempted": true,
+      "ok": true
+    },
+    "qa": {
+      "attempted": true,
+      "ok": true
+    }
+  },
+  "sections": {
+    "total": 7,
+    "registered": 7,
+    "dualExportOk": 3,
+    "dualExportSampled": 3,
+    "ids": [
+      "promo",
+      "header",
+      "hero",
+      "features",
+      "how-it-works",
+      "cta",
+      "footer"
+    ],
+    "dualExportDetails": [
+      {
+        "id": "promo",
+        "describe": true,
+        "promptShort": true
+      },
+      {
+        "id": "header",
+        "describe": true,
+        "promptShort": true
+      },
+      {
+        "id": "hero",
+        "describe": true,
+        "promptShort": true
+      }
+    ]
+  },
+  "compile": {
+    "firstPassQaOk": true,
+    "buildSkipped": true,
+    "validateOk": true,
+    "listOk": true
+  },
+  "visual": {
+    "baselineExists": false,
+    "visualDiffScore": null
+  },
+  "human": {
+    "fixUpMinutes": 0,
+    "notes": "In-repo Northline demo; offline structure + dual-export gate."
+  },
+  "scores": {
+    "structureScore": 1,
+    "contentScore": 1,
+    "overall": 1
+  },
+  "probes": {
+    "listStatus": 0,
+    "validateStatus": 0,
+    "qaStatus": 0
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "caseId": "replace-me",
+  "sourceUrl": "https://example.com/",
+  "rightsNote": "Explain rights: owned site, written permission, or allowed sandbox.",
+  "date": null,
+  "gitSha": null,
+  "pipelineMode": "init-clone",
+  "pipeline": {
+    "initClone": { "attempted": true, "ok": null },
+    "capture": { "attempted": true, "ok": null },
+    "hygiene": { "attempted": false, "ok": null },
+    "tokens": { "attempted": true, "ok": null },
+    "specs": { "attempted": true, "ok": null },
+    "scaffold": { "attempted": true, "ok": null },
+    "register": { "attempted": true, "ok": null },
+    "qa": { "attempted": true, "ok": null }
+  },
+  "sections": {
+    "total": null,
+    "registered": null,
+    "dualExportOk": null,
+    "dualExportSampled": null,
+    "ids": [],
+    "dualExportDetails": []
+  },
+  "compile": {
+    "firstPassQaOk": null,
+    "buildSkipped": true,
+    "validateOk": null,
+    "listOk": null
+  },
+  "visual": {
+    "baselineExists": false,
+    "visualDiffScore": null
+  },
+  "human": {
+    "fixUpMinutes": null,
+    "notes": ""
+  },
+  "scores": {
+    "structureScore": null,
+    "contentScore": null,
+    "overall": null
+  }
+}

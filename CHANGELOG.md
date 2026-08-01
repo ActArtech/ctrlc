@@ -7,6 +7,13 @@ Versions follow [SemVer](https://semver.org/) once 1.0.0 is cut. Pre-1.0 APIs ma
 
 ## [Unreleased]
 
+### Added - Path to 1.0 scaffolding
+
+- Roadmap: `docs/roadmap/PATH_TO_1.0.md`, `API_FREEZE.md`, `VERSIONING.md`, `DISTRIBUTION.md`
+- Eval harness: `docs/eval/*`, `scripts/eval/score-case.mjs`, `eval:northline` / `eval:aggregate`
+- Northline baseline scores under `docs/eval/results/`
+- Epic H backlog (H1-H12); minimal `.devcontainer` for Node 20
+
 ### Changed - Positioning
 
 - Lead with **React section packs + recreation guidance** (not full website creation or HTML scraping)

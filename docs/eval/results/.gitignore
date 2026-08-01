@@ -1,0 +1,2 @@
+# Allow committing scored metrics JSON; ignore scratch only
+*.tmp

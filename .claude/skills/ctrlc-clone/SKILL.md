@@ -206,3 +206,13 @@ ctrlc library --cwd .
 | `docs/templates/parallel-build.md` | Parallel builders |
 | `docs/templates/AGENTS.clone.md` | Generated app agent notes |
 | `examples/clone-template/` | Empty SectionPack host |
+
+## Path to quality
+
+CtrlC is **0.1.x MVP** until distribution and eval baselines land. After real runs:
+
+1. Record metrics (fix-up minutes, structure score, qa / dual-export gates) - see `docs/eval/README.md` and `docs/eval/AGENT_EVAL.md`.
+2. Prefer scoring with `node scripts/eval/score-case.mjs --case docs/eval/cases/<id>/case.json --cwd <project> --out docs/eval/results/<id>.json`.
+3. Track version line and publish readiness via `docs/roadmap/PATH_TO_1.0.md` (also `VERSIONING.md`, `DISTRIBUTION.md`).
+
+Parallel builders still need **human review** on 0.1.x. Do not claim 1.0 quality from scaffold or IR alone.
