@@ -3,8 +3,8 @@
   "sourceUrl": "internal Northline demo (examples/next-demo)",
   "rightsNote": "Owned fictional brand shipping in the monorepo; not a third-party commercial site.",
   "date": "2026-08-01",
-  "gitSha": "b491026",
-  "scoredAt": "2026-08-01T02:18:59.580Z",
+  "gitSha": "d878620",
+  "scoredAt": "2026-08-01T02:22:18.406Z",
   "hostCwd": "examples/next-demo",
   "pipelineMode": "existing-host",
   "pipeline": {

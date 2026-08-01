@@ -1,6 +1,6 @@
 # Eval results summary
 
-Generated: 2026-08-01T02:19:04.023Z
+Generated: 2026-08-01T02:22:22.841Z
 Cases: 1
 
 | caseId | date | sections | dualExport | QA | structure | content | overall | fixUp min |

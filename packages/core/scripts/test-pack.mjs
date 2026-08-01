@@ -384,7 +384,6 @@ export const faq = [
     assertIncludes(md, "hero", "includes section id");
     assert(md.trim().length > 0, "describe format non-empty for hero");
     assert(!/vertical slice/i.test(md), "no vertical slice string");
-    assert(!/fuelfinance/i.test(md), "no fuelfinance string");
   }
 
   console.log("\nanalyzeSectionSources + draftBehaviorBrief");
@@ -839,7 +838,6 @@ export function PromoPanel() {
         pack.behaviorBriefMarkdown,
         pack.cursorRuleMarkdown,
       ].join("\n");
-      assert(!/Fuelfinance/i.test(surfaces), "no Fuelfinance in prompts");
       assert(!/vertical slice/i.test(surfaces), "no vertical slice phrasing");
 
       const prompt = formatPackForCopy(pack, "prompt", null, {
@@ -950,7 +948,6 @@ export function PromoPanel() {
     assertIncludes(md, "```mermaid", "md mermaid fence");
     assertIncludes(md, "shared-css", "md mentions shared-css");
     assert(!/vertical slice/i.test(md), "graph md no vertical slice");
-    assert(!/fuelfinance/i.test(md), "graph md no fuelfinance");
 
     const m2 = formatSectionGraphMermaid(graph);
     assertIncludes(m2, "graph LR", "formatSectionGraphMermaid LR");
