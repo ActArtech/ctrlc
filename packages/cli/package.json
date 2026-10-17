@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "SectionPack CLI: validate, list, pack, pack-multi, graph, scan, snapshot, watch, library, and capture for CtrlC hosts.",
   "license": "MIT",
+  "author": { "name": "Alaa Almallah", "url": "https://alaaalmallah.com" },
+  "repository": { "type": "git", "url": "git+https://github.com/ActArtech/ctrlc.git" },
+  "bugs": { "url": "https://github.com/ActArtech/ctrlc/issues" },
+  "homepage": "https://github.com/ActArtech/ctrlc#readme",
   "type": "module",
   "bin": {
     "ctrlc": "./bin/ctrlc.mjs"

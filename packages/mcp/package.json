@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Lightweight MCP server for CtrlC SectionPack tools (list, pack, validate). React section packs first; not full website creation.",
   "license": "MIT",
+  "author": { "name": "Alaa Almallah", "url": "https://alaaalmallah.com" },
+  "repository": { "type": "git", "url": "git+https://github.com/ActArtech/ctrlc.git" },
+  "bugs": { "url": "https://github.com/ActArtech/ctrlc/issues" },
+  "homepage": "https://github.com/ActArtech/ctrlc#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "ctrlc-mcp": "./bin/ctrlc-mcp.mjs"

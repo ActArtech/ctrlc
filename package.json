@@ -4,6 +4,10 @@
   "private": true,
   "description": "CtrlC: React section packs + recreation guidance (SectionPack dual export). Not full website creation; not HTML scraping.",
   "license": "MIT",
+  "author": { "name": "Alaa Almallah", "url": "https://alaaalmallah.com" },
+  "repository": { "type": "git", "url": "git+https://github.com/ActArtech/ctrlc.git" },
+  "bugs": { "url": "https://github.com/ActArtech/ctrlc/issues" },
+  "homepage": "https://github.com/ActArtech/ctrlc#readme",
   "keywords": [
     "ctrlc",
     "sectionpack",
