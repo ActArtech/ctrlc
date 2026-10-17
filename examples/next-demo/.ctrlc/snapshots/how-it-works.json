@@ -1,0 +1,24 @@
+{
+  "id": "how-it-works",
+  "contentHash": "57d7828debad756c3343dde40cf001bb66609cef4d7ab3ed36aa6958cbdaf83e",
+  "generatedAt": "2026-10-17T17:30:08.848Z",
+  "byteSizes": {
+    "component": 953,
+    "content": 580,
+    "css": 2346,
+    "related": 0,
+    "prompt": 5062,
+    "promptShort": 4559,
+    "totalFiles": 15557,
+    "files": {
+      "src/components/sections/HowItWorks.tsx": 953,
+      "src/content/home.ts": 2955,
+      "src/styles/demo.css": 11649
+    }
+  },
+  "tags": [
+    "how-it-works",
+    "steps",
+    "process"
+  ]
+}

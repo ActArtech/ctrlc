@@ -1,0 +1,23 @@
+{
+  "id": "header",
+  "contentHash": "e24e980223f95a0a175aae085d0cf51e24a774f1dd690ef0117f388650780cc6",
+  "generatedAt": "2026-10-17T17:30:08.827Z",
+  "byteSizes": {
+    "component": 629,
+    "content": 488,
+    "css": 2588,
+    "related": 0,
+    "prompt": 4824,
+    "promptShort": 4323,
+    "totalFiles": 15233,
+    "files": {
+      "src/components/sections/SiteHeader.tsx": 629,
+      "src/content/home.ts": 2955,
+      "src/styles/demo.css": 11649
+    }
+  },
+  "tags": [
+    "chrome",
+    "nav"
+  ]
+}

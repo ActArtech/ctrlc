@@ -1,0 +1,24 @@
+{
+  "id": "promo",
+  "contentHash": "c06430a5fdc288b470e68492babdc3e489034fee6181fd0e91f325a5b60df7f7",
+  "generatedAt": "2026-10-17T17:30:08.817Z",
+  "byteSizes": {
+    "component": 408,
+    "content": 109,
+    "css": 1430,
+    "related": 0,
+    "prompt": 3072,
+    "promptShort": 2573,
+    "totalFiles": 15012,
+    "files": {
+      "src/components/sections/PromoBar.tsx": 408,
+      "src/content/home.ts": 2955,
+      "src/styles/demo.css": 11649
+    }
+  },
+  "tags": [
+    "chrome",
+    "announcement",
+    "cta"
+  ]
+}

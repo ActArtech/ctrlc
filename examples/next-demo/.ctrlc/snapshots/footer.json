@@ -1,0 +1,23 @@
+{
+  "id": "footer",
+  "contentHash": "e7e566bb54731b0bcab02adba32eaa7fee2abf0e4805637a790c718cebec770d",
+  "generatedAt": "2026-10-17T17:30:08.862Z",
+  "byteSizes": {
+    "component": 733,
+    "content": 334,
+    "css": 1665,
+    "related": 0,
+    "prompt": 3828,
+    "promptShort": 3327,
+    "totalFiles": 15337,
+    "files": {
+      "src/components/sections/SiteFooter.tsx": 733,
+      "src/content/home.ts": 2955,
+      "src/styles/demo.css": 11649
+    }
+  },
+  "tags": [
+    "chrome",
+    "footer"
+  ]
+}

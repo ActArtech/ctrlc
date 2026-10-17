@@ -46,8 +46,9 @@ temp/
 # Page capture runs (ctrlc capture --out runs/...)
 runs/
 
-# Snapshots / local agent library dumps (regenerate)
-**/.ctrlc/snapshots/
+# Local agent library dumps (regenerate).
+# Pack snapshots under **/.ctrlc/snapshots/ ARE committed: ci.yml uses them as
+# contentHash drift baselines (see "Check SectionPack contentHash drift" step).
 **/.ctrlc/*.json.bak
 
 # Optional local worktrees / OS junk

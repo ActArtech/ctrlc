@@ -1,0 +1,23 @@
+{
+  "id": "cta",
+  "contentHash": "53512ba4d9f73d12f9db9c51a81ddcced4549fef473002375c541480a6c85d0c",
+  "generatedAt": "2026-10-17T17:30:08.856Z",
+  "byteSizes": {
+    "component": 643,
+    "content": 299,
+    "css": 2380,
+    "related": 0,
+    "prompt": 4386,
+    "promptShort": 3899,
+    "totalFiles": 15247,
+    "files": {
+      "src/components/sections/Cta.tsx": 643,
+      "src/content/home.ts": 2955,
+      "src/styles/demo.css": 11649
+    }
+  },
+  "tags": [
+    "cta",
+    "conversion"
+  ]
+}

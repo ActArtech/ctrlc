@@ -1,0 +1,23 @@
+{
+  "id": "features",
+  "contentHash": "533f77fa4153fd1c1c01a34cc40ce2fa1fd81f4eb23cc226cc8c1820d9cdc0a9",
+  "generatedAt": "2026-10-17T17:30:08.841Z",
+  "byteSizes": {
+    "component": 905,
+    "content": 573,
+    "css": 2192,
+    "related": 0,
+    "prompt": 4774,
+    "promptShort": 4277,
+    "totalFiles": 15509,
+    "files": {
+      "src/components/sections/Features.tsx": 905,
+      "src/content/home.ts": 2955,
+      "src/styles/demo.css": 11649
+    }
+  },
+  "tags": [
+    "features",
+    "cards"
+  ]
+}
